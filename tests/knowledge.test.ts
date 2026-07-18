@@ -142,5 +142,9 @@ describe("InMemoryVectorStore", () => {
     await expect(
       store.upsert([{ ...base, index: 1, text: "b" }], [[1, 0, 0]])
     ).rejects.toThrow(RangeError);
+    // Rejection must be atomic — the first row survives untouched.
+    const rows = await store.query([1, 0], 10);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ documentId: "d1", index: 0, text: "a" });
   });
 });
