@@ -31,8 +31,35 @@ export interface OrchestratorRequest {
 export interface OrchestratorResponse {
   agentId: AgentId;
   route: RouteDecision | { method: "explicit" };
+  /** "delivered" — output is the agent's response; "held" — Council blocked it. */
+  status: "delivered" | "held";
+  /**
+   * The agent output when delivered, or a hold notice when the Council decided
+   * `reject`/`revise`. The raw blocked text is never returned — inspect
+   * `council.recommendation` for the rationale and required revisions.
+   */
   output: string;
   council: DeliberationResult | null;
+}
+
+/**
+ * Council gate: high-stakes output is reviewed *before* delivery. A `reject`
+ * or `revise` decision withholds the agent text (replacing it with a notice);
+ * `proceed` / `proceed_with_conditions` / no review deliver it unchanged.
+ * Pure function of the deliberation result so it is unit-testable.
+ */
+export function applyCouncilGate(
+  output: string,
+  council: DeliberationResult | null
+): { status: "delivered" | "held"; output: string } {
+  const decision = council?.recommendation.decision;
+  if (decision === "reject" || decision === "revise") {
+    return {
+      status: "held",
+      output: `This response was held by the META SUPREME X Council (decision: ${decision}). See the council recommendation for the rationale and required revisions before it can be delivered.`,
+    };
+  }
+  return { status: "delivered", output };
 }
 
 const RouteSchema = z.object({
@@ -111,5 +138,7 @@ export async function orchestrate(request: OrchestratorRequest): Promise<Orchest
     });
   }
 
-  return { agentId, route, output, council };
+  // 4. Gate delivery on the Council's decision (reject/revise → withhold).
+  const gated = applyCouncilGate(output, council);
+  return { agentId, route, status: gated.status, output: gated.output, council };
 }
