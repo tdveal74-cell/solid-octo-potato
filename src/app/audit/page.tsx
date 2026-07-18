@@ -85,25 +85,36 @@ export default function AuditPage() {
       </p>
 
       <form onSubmit={submit} className="mt-10 space-y-6">
-        <input
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          placeholder="Your role, e.g. Senior Financial Analyst"
-          className="w-full rounded-sm border border-ink-border bg-ink-raised p-3 text-sm text-fog placeholder:text-fog-dim focus:border-brass focus:outline-none"
-        />
+        <div>
+          <label htmlFor="audit-role" className="block text-sm text-fog">
+            Your role
+          </label>
+          <input
+            id="audit-role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder="e.g. Senior Financial Analyst"
+            className="mt-2 w-full rounded-sm border border-ink-border bg-ink-raised p-3 text-sm text-fog placeholder:text-fog-dim focus:border-brass focus:outline-none"
+          />
+        </div>
 
         {tasks.map((task, i) => (
           <div key={task.key} className="rounded-sm border border-ink-border p-5">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <label htmlFor={`task-name-${task.key}`} className="sr-only">
+                Task {i + 1} name
+              </label>
               <input
+                id={`task-name-${task.key}`}
                 value={task.name}
                 onChange={(e) => updateTask(task.key, { name: e.target.value })}
                 placeholder={`Task ${i + 1}, e.g. "Monthly variance reporting"`}
                 className="flex-1 rounded-sm border border-ink-border bg-ink-raised p-2.5 text-sm text-fog placeholder:text-fog-dim focus:border-brass focus:outline-none"
               />
-              <label className="flex items-center gap-2 text-xs text-fog-dim">
+              <label htmlFor={`task-time-${task.key}`} className="flex items-center gap-2 text-xs text-fog-dim">
                 % of time
                 <input
+                  id={`task-time-${task.key}`}
                   type="number"
                   min={0}
                   max={100}
@@ -178,8 +189,8 @@ export default function AuditPage() {
               <p className="text-xs uppercase tracking-widest text-signal-green">Double down here</p>
               {audit.humanLeverage.length > 0 ? (
                 <ul className="mt-3 space-y-1 text-sm text-fog">
-                  {audit.humanLeverage.map((t) => (
-                    <li key={t}>▸ {t}</li>
+                  {audit.humanLeverage.map((t, i) => (
+                    <li key={`${i}-${t}`}>▸ {t}</li>
                   ))}
                 </ul>
               ) : (
@@ -193,8 +204,8 @@ export default function AuditPage() {
             <div className="rounded-sm border border-ink-border p-5">
               <p className="text-xs uppercase tracking-widest text-signal-red">Automation front</p>
               <ul className="mt-3 space-y-1 text-sm text-fog">
-                {audit.automationFront.map((t) => (
-                  <li key={t}>▸ {t}</li>
+                {audit.automationFront.map((t, i) => (
+                  <li key={`${i}-${t}`}>▸ {t}</li>
                 ))}
               </ul>
             </div>
@@ -202,7 +213,8 @@ export default function AuditPage() {
 
           <div className="rounded-sm border border-ink-border p-5">
             <p className="text-xs uppercase tracking-widest text-fog-dim">Task breakdown</p>
-            <table className="mt-3 w-full text-left text-sm">
+            <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[28rem] text-left text-sm">
               <thead className="text-xs text-fog-dim">
                 <tr>
                   <th className="py-2 font-normal">Task</th>
@@ -212,8 +224,8 @@ export default function AuditPage() {
                 </tr>
               </thead>
               <tbody>
-                {audit.tasks.map((t) => (
-                  <tr key={t.name} className="border-t border-ink-border text-fog">
+                {audit.tasks.map((t, i) => (
+                  <tr key={`${i}-${t.name}`} className="border-t border-ink-border text-fog">
                     <td className="py-2">{t.name}</td>
                     <td className="py-2">{t.timeShare}%</td>
                     <td className="py-2">{t.exposure}</td>
@@ -222,6 +234,7 @@ export default function AuditPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}

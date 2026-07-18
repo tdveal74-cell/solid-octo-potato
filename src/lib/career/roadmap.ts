@@ -27,19 +27,21 @@ const RoadmapSchema = z.object({
       priority: z.enum(["now", "next", "later"]),
     })
   ),
-  phases: z.array(
-    z.object({
-      name: z.string(),
-      horizon: z.string(),
-      actions: z.array(z.string()),
-      successSignal: z.string(),
-    })
-  ),
+  phases: z
+    .array(
+      z.object({
+        name: z.string(),
+        horizon: z.string(),
+        actions: z.array(z.string()).min(1),
+        successSignal: z.string(),
+      })
+    )
+    .min(1),
   learningPath: z.array(
     z.object({
       topic: z.string(),
       format: z.string(),
-      estimatedWeeks: z.number(),
+      estimatedWeeks: z.number().int().min(1),
     })
   ),
 });
@@ -74,7 +76,7 @@ ${taskTable}
 Human-leverage tasks (concentrate here): ${audit.humanLeverage.join(", ")}
 Automation front (delegate/automate first): ${audit.automationFront.join(", ")}
 
-Requirements: the roadmap must shift time from the automation front toward human-leverage tasks; skill gaps must map to specific tasks in the audit; phases must have observable success signals, not vibes.`,
+Requirements: the roadmap must shift time from the automation front toward human-leverage tasks; skill gaps must map to specific tasks in the audit; phases must have observable success signals, not vibes; every phase needs at least one action; estimatedWeeks is a whole number of weeks, minimum 1.`,
       },
     ],
     output_config: { format: zodOutputFormat(RoadmapSchema) },

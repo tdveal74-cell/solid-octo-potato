@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen">
         <header className="border-b border-ink-border">
-          <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
             <Link href="/" className="flex items-baseline gap-3">
               <span className="font-[family-name:var(--font-display)] text-lg tracking-wide text-fog">
                 The Quiet Operator
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Meta Supreme X
               </span>
             </Link>
-            <div className="flex items-center gap-6 text-sm text-fog-dim">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-fog-dim sm:gap-6">
               <Link href="/dashboard" className="hover:text-fog">
                 Dashboard
               </Link>

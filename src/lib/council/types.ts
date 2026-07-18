@@ -80,8 +80,17 @@ export interface DeliberationResult {
 }
 
 export interface ConsensusReport {
-  /** 0–100. Weighted, confidence-adjusted agreement across councils. */
+  /**
+   * 0–100 directional SUPPORT for the proposal (100 endorse ↔ 0 oppose).
+   * Low confidence attenuates toward the neutral 50.
+   */
   score: number;
+  /**
+   * 0–100 AGREEMENT among councils, independent of direction — unanimous
+   * opposition scores as high as unanimous endorsement.
+   */
+  agreement: number;
+  /** Band of `agreement` (not of `score`). */
   band: "unanimous" | "strong" | "split" | "contested";
   stanceBreakdown: Record<Stance, number>;
   contradictions: Contradiction[];

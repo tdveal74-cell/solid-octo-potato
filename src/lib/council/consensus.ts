@@ -25,11 +25,15 @@ const SEVERITY_WEIGHT: Record<RiskFlag["severity"], number> = {
 const SEVERITY_ORDER: RiskFlag["severity"][] = ["low", "medium", "high", "critical"];
 
 /**
- * Weighted, confidence-adjusted consensus score in [0, 100].
+ * Weighted, confidence-adjusted support score in [0, 100]. Directional:
  *
  * 100 = every non-abstaining council fully endorses at full confidence;
  * 0   = every non-abstaining council opposes at full confidence;
- * 50  = perfectly split or universally abstaining.
+ * 50  = perfectly split, universally abstaining, or zero effective confidence.
+ *
+ * Confidence appears only in the numerator, so a low-confidence stance
+ * attenuates toward the neutral 50 instead of normalizing back to certainty —
+ * a single endorsement at 0.01 confidence scores ~50, not 100.
  */
 export function consensusScore(verdicts: CouncilVerdict[]): number {
   const active = verdicts.filter((v) => v.stance !== "abstain");
@@ -40,19 +44,53 @@ export function consensusScore(verdicts: CouncilVerdict[]): number {
   for (const v of active) {
     const councilWeight = COUNCILS[v.councilId]?.weight ?? 1;
     const confidence = clamp01(v.confidence);
-    const w = councilWeight * confidence;
-    weightedSum += STANCE_VALUE[v.stance] * w;
-    weightTotal += w;
+    weightedSum += STANCE_VALUE[v.stance] * councilWeight * confidence;
+    weightTotal += councilWeight;
   }
   if (weightTotal === 0) return 50;
   // Map [-1, 1] → [0, 100]
   return round1(((weightedSum / weightTotal + 1) / 2) * 100);
 }
 
-export function consensusBand(score: number): ConsensusReport["band"] {
-  if (score >= 90) return "unanimous";
-  if (score >= 70) return "strong";
-  if (score >= 45) return "split";
+/**
+ * Agreement score in [0, 100], independent of direction: how much the
+ * non-abstaining councils agree with EACH OTHER. Unanimous opposition scores
+ * as high as unanimous endorsement — that distinction lives in
+ * `consensusScore`. Computed from the weighted dispersion of stance values.
+ */
+export function agreementScore(verdicts: CouncilVerdict[]): number {
+  const active = verdicts.filter((v) => v.stance !== "abstain");
+  if (active.length === 0) return 50; // no positions — no signal either way
+
+  let weightTotal = 0;
+  let mean = 0;
+  for (const v of active) {
+    const w = (COUNCILS[v.councilId]?.weight ?? 1) * clamp01(v.confidence);
+    mean += STANCE_VALUE[v.stance] * w;
+    weightTotal += w;
+  }
+  if (weightTotal === 0) return 50;
+  mean /= weightTotal;
+
+  let variance = 0;
+  for (const v of active) {
+    const w = (COUNCILS[v.councilId]?.weight ?? 1) * clamp01(v.confidence);
+    variance += w * (STANCE_VALUE[v.stance] - mean) ** 2;
+  }
+  variance /= weightTotal;
+  // Max possible std dev on the [-1, 1] stance axis is 1 (a 50/50 split).
+  const dispersion = Math.min(1, Math.sqrt(variance));
+  return round1((1 - dispersion) * 100);
+}
+
+/**
+ * Band an AGREEMENT score (not the directional support score). Boundaries are
+ * half-open: a value belongs to the highest band whose threshold it meets.
+ */
+export function consensusBand(agreement: number): ConsensusReport["band"] {
+  if (agreement >= 90) return "unanimous";
+  if (agreement >= 70) return "strong";
+  if (agreement >= 45) return "split";
   return "contested";
 }
 
@@ -104,6 +142,7 @@ export function aggregateRisk(verdicts: CouncilVerdict[]): ConsensusReport["aggr
 
 export function buildConsensusReport(verdicts: CouncilVerdict[]): ConsensusReport {
   const score = consensusScore(verdicts);
+  const agreement = agreementScore(verdicts);
   const stanceBreakdown: Record<Stance, number> = {
     endorse: 0,
     endorse_with_conditions: 0,
@@ -113,7 +152,8 @@ export function buildConsensusReport(verdicts: CouncilVerdict[]): ConsensusRepor
   for (const v of verdicts) stanceBreakdown[v.stance]++;
   return {
     score,
-    band: consensusBand(score),
+    agreement,
+    band: consensusBand(agreement),
     stanceBreakdown,
     contradictions: detectContradictions(verdicts),
     aggregateRisk: aggregateRisk(verdicts),

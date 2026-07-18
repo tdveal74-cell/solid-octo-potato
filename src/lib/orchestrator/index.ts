@@ -20,7 +20,11 @@ export interface OrchestratorRequest {
   agentId?: AgentId;
   /** User/session memory injected into the agent context. */
   memory?: string[];
-  /** Force or suppress Council review regardless of the agent default. */
+  /**
+   * Request Council review for an agent that doesn't escalate by default.
+   * Cannot suppress review: an agent's `escalateToCouncil: true` is mandatory
+   * and wins over `councilReview: false`.
+   */
   councilReview?: boolean;
 }
 
@@ -47,7 +51,10 @@ async function routeByModel(input: string): Promise<AgentId> {
     messages: [{ role: "user", content: `Route this request:\n\n${input}` }],
     output_config: { format: zodOutputFormat(RouteSchema) },
   });
-  return response.parsed_output?.agentId ?? "research-intelligence";
+  if (!response.parsed_output) {
+    throw new Error(`Routing model returned unparseable output (stop_reason: ${response.stop_reason})`);
+  }
+  return response.parsed_output.agentId;
 }
 
 async function executeAgent(agentId: AgentId, input: string, memory?: string[]): Promise<string> {
@@ -92,8 +99,10 @@ export async function orchestrate(request: OrchestratorRequest): Promise<Orchest
   // 2. Execute
   const output = await executeAgent(agentId, request.input, request.memory);
 
-  // 3. Council escalation for high-stakes outputs
-  const shouldReview = request.councilReview ?? AGENTS[agentId].escalateToCouncil;
+  // 3. Council escalation for high-stakes outputs. Mandatory escalation is a
+  //    safety control — callers can add review, never remove it.
+  const shouldReview =
+    AGENTS[agentId].escalateToCouncil || request.councilReview === true;
   let council: DeliberationResult | null = null;
   if (shouldReview) {
     council = await deliberate({

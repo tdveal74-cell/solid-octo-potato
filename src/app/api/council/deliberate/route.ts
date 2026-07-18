@@ -7,11 +7,15 @@ import { COUNCIL_IDS } from "@/lib/council/types";
 export const maxDuration = 300;
 
 const BodySchema = z.object({
-  question: z.string().min(8, "question must be at least 8 characters"),
-  context: z.string().optional(),
+  question: z.string().min(8, "question must be at least 8 characters").max(4000),
+  context: z.string().max(24000).optional(),
+  // Duplicates are removed so a crafted request can't multiply council
+  // fan-out; post-dedupe length is bounded by the 8 distinct council ids.
   councils: z
     .array(z.enum(COUNCIL_IDS as [string, ...string[]]))
     .nonempty()
+    .max(32)
+    .transform((ids) => [...new Set(ids)])
     .optional(),
   debate: z.boolean().optional(),
 });

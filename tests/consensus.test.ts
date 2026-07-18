@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   aggregateRisk,
+  agreementScore,
   buildConsensusReport,
   consensusBand,
   consensusScore,
@@ -72,6 +73,14 @@ describe("consensusScore", () => {
     expect(consensusScore(confident)).toBeGreaterThan(consensusScore(shaky));
   });
 
+  it("attenuates a lone low-confidence endorsement toward neutral, not certainty", () => {
+    // Confidence lives only in the numerator: a single 0.01-confidence
+    // endorsement must land near the neutral 50, never at 100.
+    const score = consensusScore([verdict({ councilId: "research", confidence: 0.01 })]);
+    expect(score).toBeGreaterThan(45);
+    expect(score).toBeLessThan(55);
+  });
+
   it("clamps out-of-range confidence instead of exploding", () => {
     const verdicts = [
       verdict({ councilId: "research", confidence: 5 }),
@@ -84,12 +93,47 @@ describe("consensusScore", () => {
 });
 
 describe("consensusBand", () => {
-  it("maps scores to bands at the documented thresholds", () => {
+  it("maps agreement values to bands at the documented thresholds", () => {
     expect(consensusBand(95)).toBe("unanimous");
     expect(consensusBand(90)).toBe("unanimous");
     expect(consensusBand(75)).toBe("strong");
     expect(consensusBand(50)).toBe("split");
     expect(consensusBand(20)).toBe("contested");
+  });
+});
+
+describe("agreementScore", () => {
+  it("scores unanimous endorsement as full agreement", () => {
+    const verdicts = [
+      verdict({ councilId: "research", confidence: 1 }),
+      verdict({ councilId: "risk", confidence: 1 }),
+    ];
+    expect(agreementScore(verdicts)).toBe(100);
+  });
+
+  it("scores unanimous OPPOSITION as full agreement too (direction-independent)", () => {
+    const oppose = [
+      verdict({ councilId: "research", stance: "oppose", confidence: 1 }),
+      verdict({ councilId: "risk", stance: "oppose", confidence: 1 }),
+    ];
+    // Directional support is 0, but the councils fully agree with each other.
+    expect(consensusScore(oppose)).toBe(0);
+    expect(agreementScore(oppose)).toBe(100);
+    expect(consensusBand(agreementScore(oppose))).toBe("unanimous");
+  });
+
+  it("scores a full endorse/oppose split as low agreement", () => {
+    const split = [
+      verdict({ councilId: "research", stance: "endorse", confidence: 1 }),
+      verdict({ councilId: "risk", stance: "oppose", confidence: 1 }),
+    ];
+    expect(agreementScore(split)).toBeLessThan(45);
+  });
+
+  it("returns 50 when every council abstains", () => {
+    expect(
+      agreementScore([verdict({ councilId: "research", stance: "abstain" })])
+    ).toBe(50);
   });
 });
 
@@ -187,5 +231,8 @@ describe("buildConsensusReport", () => {
     expect(report.contradictions.length).toBeGreaterThan(0);
     expect(report.score).toBeGreaterThanOrEqual(0);
     expect(report.score).toBeLessThanOrEqual(100);
+    expect(report.agreement).toBeGreaterThanOrEqual(0);
+    expect(report.agreement).toBeLessThanOrEqual(100);
+    expect(report.band).toBe(consensusBand(report.agreement));
   });
 });
