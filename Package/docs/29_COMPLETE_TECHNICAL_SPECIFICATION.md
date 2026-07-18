@@ -17,7 +17,7 @@ and the code disagree, the code is right and this document has a bug.
 
 ## Repository layout
 
-```
+```text
 src/
   app/                      # Next.js App Router
     page.tsx                # Landing (brand + system overview)
@@ -47,7 +47,8 @@ Package/docs/               # Build package documents (this set: 26–30)
 ### `POST /api/council/deliberate`
 Request: `{ question: string, context?, councils?: CouncilId[], debate?: boolean }`
 Response: `DeliberationResult` — phase1/phase2 verdicts, consensus report
-(score, band, contradictions, aggregate risk), final recommendation, elapsedMs.
+(support `score`, `agreement`, `band`, contradictions, aggregate risk), final
+recommendation, elapsedMs.
 Errors: 400 invalid body, 503 AI unconfigured, 500 deliberation failure.
 
 ### `POST /api/orchestrate`
@@ -92,7 +93,7 @@ degrade to 503/warnings rather than crashing.
 
 ## Quality gates
 
-```
+```text
 npm run typecheck   # strict TS, no emit
 npm run test        # vitest — deterministic engines
 npm run build       # production build must pass

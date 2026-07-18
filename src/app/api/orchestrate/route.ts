@@ -7,9 +7,9 @@ import { orchestrate } from "@/lib/orchestrator";
 export const maxDuration = 300;
 
 const BodySchema = z.object({
-  input: z.string().min(2),
+  input: z.string().min(2).max(20000),
   agentId: z.enum(AGENT_IDS as [AgentId, ...AgentId[]]).optional(),
-  memory: z.array(z.string()).optional(),
+  memory: z.array(z.string().max(2000)).max(50).optional(),
   councilReview: z.boolean().optional(),
 });
 

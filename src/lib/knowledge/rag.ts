@@ -46,6 +46,15 @@ export function chunkDocument(
   doc: KnowledgeDocument,
   { maxChars = 1600, overlapChars = 200 }: { maxChars?: number; overlapChars?: number } = {}
 ): Chunk[] {
+  if (
+    !Number.isInteger(maxChars) ||
+    !Number.isInteger(overlapChars) ||
+    maxChars <= 0 ||
+    overlapChars < 0 ||
+    overlapChars >= maxChars
+  ) {
+    throw new RangeError("Expected integers with 0 <= overlapChars < maxChars");
+  }
   const text = doc.content.trim();
   if (!text) return [];
   const chunks: Chunk[] = [];
@@ -78,11 +87,13 @@ export function chunkDocument(
 }
 
 export function cosineSimilarity(a: number[], b: number[]): number {
+  if (a.length !== b.length) {
+    throw new RangeError(`Vector dimension mismatch: ${a.length} vs ${b.length}`);
+  }
   let dot = 0;
   let normA = 0;
   let normB = 0;
-  const len = Math.min(a.length, b.length);
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < a.length; i++) {
     dot += a[i] * b[i];
     normA += a[i] * a[i];
     normB += b[i] * b[i];
@@ -94,8 +105,21 @@ export function cosineSimilarity(a: number[], b: number[]): number {
 /** In-memory vector store for tests and local development. */
 export class InMemoryVectorStore implements VectorStore {
   private rows: { chunk: Chunk; embedding: number[] }[] = [];
+  private dimension: number | null = null;
 
   async upsert(chunks: Chunk[], embeddings: number[][]): Promise<void> {
+    // Validate everything before mutating so a bad batch can't leave the
+    // store partially written or holding undefined embeddings.
+    if (chunks.length !== embeddings.length) {
+      throw new RangeError(
+        `Expected one embedding per chunk: ${chunks.length} chunks, ${embeddings.length} embeddings`
+      );
+    }
+    const dim = this.dimension ?? embeddings[0]?.length ?? null;
+    if (dim !== null && embeddings.some((e) => e.length !== dim)) {
+      throw new RangeError(`All embeddings must have dimension ${dim}`);
+    }
+    this.dimension = dim;
     chunks.forEach((chunk, i) => {
       this.rows = this.rows.filter(
         (r) => !(r.chunk.documentId === chunk.documentId && r.chunk.index === chunk.index)
@@ -152,8 +176,18 @@ export async function answerWithContext(
     .map((b) => b.text)
     .join("");
 
+  // Only surface documents the answer actually cites ([n] markers), so the
+  // citation list never overstates support. The system prompt requires
+  // citation-by-number, making the markers deterministic to extract.
+  const referenced = new Set<number>();
+  for (const match of answer.matchAll(/\[(\d+)\]/g)) {
+    const idx = Number(match[1]) - 1;
+    if (idx >= 0 && idx < retrieved.length) referenced.add(idx);
+  }
   const seen = new Set<string>();
-  const citations = retrieved
+  const citations = [...referenced]
+    .sort((a, b) => a - b)
+    .map((i) => retrieved[i])
     .filter((c) => (seen.has(c.documentId) ? false : (seen.add(c.documentId), true)))
     .map((c) => ({ title: c.documentTitle, source: c.source, grade: c.grade }));
 

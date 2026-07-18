@@ -13,8 +13,14 @@ export interface RouteDecision {
  * classification (utility model) only when this pass is low-confidence.
  *
  * Scoring: each agent trigger phrase found in the input scores by phrase
- * length (longer, more specific phrases dominate generic ones).
+ * length (longer, more specific phrases dominate generic ones). Matching is
+ * word-boundary aware so "shortage" never matches the "short" trigger.
  */
+function matchesTrigger(text: string, trigger: string): boolean {
+  const escaped = trigger.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`\\b${escaped}\\b`).test(text);
+}
+
 export function routeByKeywords(input: string): RouteDecision {
   const text = input.toLowerCase();
   let best: { agentId: AgentId; score: number } | null = null;
@@ -22,7 +28,7 @@ export function routeByKeywords(input: string): RouteDecision {
   for (const agentId of AGENT_IDS) {
     let score = 0;
     for (const trigger of AGENTS[agentId].triggers) {
-      if (text.includes(trigger)) score += trigger.split(/\s+/).length * trigger.length;
+      if (matchesTrigger(text, trigger)) score += trigger.split(/\s+/).length * trigger.length;
     }
     if (score > 0 && (!best || score > best.score)) {
       best = { agentId, score };

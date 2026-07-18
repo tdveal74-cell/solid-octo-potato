@@ -95,7 +95,14 @@ export function runAudit(tasks: TaskInput[]): AuditResult {
   if (tasks.length === 0) {
     throw new Error("Audit requires at least one task");
   }
-  const totalTime = tasks.reduce((s, t) => s + Math.max(0, t.timeShare), 0);
+  if (
+    tasks.some(
+      (t) => !Number.isFinite(t.timeShare) || t.timeShare < 0 || t.timeShare > 100
+    )
+  ) {
+    throw new Error("Task time shares must be finite values between 0 and 100");
+  }
+  const totalTime = tasks.reduce((s, t) => s + t.timeShare, 0);
   if (totalTime <= 0) {
     throw new Error("Task time shares must sum to a positive number");
   }
@@ -104,7 +111,7 @@ export function runAudit(tasks: TaskInput[]): AuditResult {
     const exposure = scoreTask(t.factors);
     return {
       name: t.name,
-      timeShare: round1((Math.max(0, t.timeShare) / totalTime) * 100),
+      timeShare: round1((t.timeShare / totalTime) * 100),
       exposure,
       classification: classifyTask(exposure),
     };

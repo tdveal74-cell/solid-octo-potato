@@ -4,6 +4,10 @@ import { COUNCILS } from "@/lib/council/councils";
 import { COUNCIL_IDS } from "@/lib/council/types";
 import { aiConfigured, MODELS } from "@/lib/ai/client";
 
+// aiConfigured() reads process.env at request time — force dynamic rendering so
+// the status reflects the running server, not the build machine.
+export const dynamic = "force-dynamic";
+
 export default function Dashboard() {
   const configured = aiConfigured();
   return (

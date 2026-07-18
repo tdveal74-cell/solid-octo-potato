@@ -51,7 +51,11 @@ export default function CouncilPage() {
       </p>
 
       <form onSubmit={submit} className="mt-10 space-y-4">
+        <label htmlFor="council-question" className="block text-sm text-fog">
+          Decision for the Council
+        </label>
         <textarea
+          id="council-question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           rows={4}
@@ -79,11 +83,18 @@ export default function CouncilPage() {
       </form>
 
       {loading && (
-        <p className="mt-8 animate-pulse font-[family-name:var(--font-mono)] text-xs uppercase tracking-widest text-brass">
+        <p
+          role="status"
+          className="mt-8 animate-pulse font-[family-name:var(--font-mono)] text-xs uppercase tracking-widest text-brass"
+        >
           Eight councils in session — this can take a few minutes…
         </p>
       )}
-      {error && <p className="mt-8 text-sm text-signal-red">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-8 text-sm text-signal-red">
+          {error}
+        </p>
+      )}
 
       {result && (
         <div className="mt-12 space-y-8">
@@ -119,7 +130,11 @@ export default function CouncilPage() {
 
           {/* Metrics */}
           <div className="grid grid-cols-3 gap-4">
-            <Metric label="Consensus" value={`${result.consensus.score}`} sub={result.consensus.band} />
+            <Metric
+              label="Support"
+              value={`${result.consensus.score}`}
+              sub={`${result.consensus.band} agreement (${result.consensus.agreement})`}
+            />
             <Metric
               label="Aggregate risk"
               value={`${result.consensus.aggregateRisk.score}`}

@@ -54,7 +54,8 @@ export const AGENTS: Record<AgentId, AgentDefinition> = {
     name: "Job Security Audit Agent",
     description: "AI-exposure scoring and structured job security audits.",
     triggers: ["job security", "ai exposure", "automation risk", "will ai take", "audit my role"],
-    escalateToCouncil: false,
+    // High-stakes: a job-security verdict shapes a person's livelihood decisions.
+    escalateToCouncil: true,
     systemPrompt: `${VOICE}\n\nYou are the Job Security Audit Agent. You run structured audits of how exposed a role is to AI automation. You reason task-by-task, not job-title-by-job-title: decompose the role into tasks, rate each for automatability today and on a 3-year horizon, and identify the human-leverage tasks worth doubling down on. Deterministic scoring is provided by the platform's audit engine — your job is the qualitative layer on top of it.`,
   },
   strategy: {

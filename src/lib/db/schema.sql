@@ -177,6 +177,10 @@ create table if not exists audit_log (
 
 -- ── Row-level security (Supabase) ───────────────────────────────────────
 
+-- RLS is enabled on every table exposed through the Supabase Data API. Tables
+-- with no policy below (organizations, audit_log) are deny-by-default for
+-- client roles: reachable only via the service role, never the anon/auth key.
+alter table organizations       enable row level security;
 alter table profiles            enable row level security;
 alter table subscriptions       enable row level security;
 alter table job_security_audits enable row level security;
@@ -187,26 +191,38 @@ alter table user_memories       enable row level security;
 alter table knowledge_documents enable row level security;
 alter table knowledge_chunks    enable row level security;
 alter table content_pieces      enable row level security;
+alter table audit_log           enable row level security;
 
 -- Owner-only baseline policies (Supabase auth.uid()); extend per-org as needed.
+-- Each policy is guarded independently: a pre-existing policy skips only itself,
+-- so re-running this schema still repairs any missing policies (a single shared
+-- exception handler would roll back and skip every policy after the first clash).
 do $$
+declare
+  policies text[][] := array[
+    ['own profile',  'profiles',            'id = auth.uid()'],
+    ['own audits',   'job_security_audits', 'profile_id = auth.uid()'],
+    ['own roadmaps', 'career_roadmaps',     'profile_id = auth.uid()'],
+    ['own runs',     'agent_runs',          'profile_id = auth.uid()'],
+    ['own memory',   'user_memories',       'profile_id = auth.uid()'],
+    ['own docs',     'knowledge_documents', 'owner_id = auth.uid()'],
+    -- Chunks inherit access from their parent document so match_chunks() works
+    -- under normal anon/auth roles, not just service-role RPCs.
+    ['own chunks',   'knowledge_chunks',    'exists (select 1 from knowledge_documents kd where kd.id = knowledge_chunks.document_id and kd.owner_id = auth.uid())'],
+    ['own content',  'content_pieces',      'profile_id = auth.uid()'],
+    -- Members may read their own organization row (write stays service-role).
+    ['member org',   'organizations',       'id in (select org_id from profiles where profiles.id = auth.uid())']
+  ];
+  p text[];
 begin
   if exists (select 1 from pg_namespace where nspname = 'auth') then
-    execute $p$ create policy "own profile"  on profiles            for all using (id = auth.uid()) $p$;
-    execute $p$ create policy "own audits"   on job_security_audits for all using (profile_id = auth.uid()) $p$;
-    execute $p$ create policy "own roadmaps" on career_roadmaps     for all using (profile_id = auth.uid()) $p$;
-    execute $p$ create policy "own runs"     on agent_runs          for all using (profile_id = auth.uid()) $p$;
-    execute $p$ create policy "own memory"   on user_memories       for all using (profile_id = auth.uid()) $p$;
-    execute $p$ create policy "own docs"     on knowledge_documents for all using (owner_id = auth.uid()) $p$;
-    -- Chunks inherit access from their parent document so match_chunks()
-    -- works under normal anon/auth roles, not just service-role RPCs.
-    execute $p$ create policy "own chunks"   on knowledge_chunks    for all using (
-      exists (
-        select 1 from knowledge_documents kd
-        where kd.id = knowledge_chunks.document_id and kd.owner_id = auth.uid()
-      )
-    ) $p$;
-    execute $p$ create policy "own content"  on content_pieces      for all using (profile_id = auth.uid()) $p$;
+    foreach p slice 1 in array policies loop
+      if not exists (
+        select 1 from pg_policies
+        where schemaname = 'public' and tablename = p[2] and policyname = p[1]
+      ) then
+        execute format('create policy %I on %I for all using (%s)', p[1], p[2], p[3]);
+      end if;
+    end loop;
   end if;
-exception when duplicate_object then null;
 end $$;

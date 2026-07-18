@@ -18,32 +18,56 @@ Each stance maps to a value on the endorse↔oppose axis:
 | abstain | 0 (excluded from scoring) |
 | oppose | −1.0 |
 
-## 2. Consensus score
+## 2. Support score and agreement score
 
+The engine reports two distinct 0–100 numbers. Conflating them was a bug: a
+directional score cannot tell "everyone endorses" from "everyone opposes" —
+both are strong *agreement*, but opposite *support*.
+
+**Support score** — how much the councils back the proposal, direction-carrying.
 For the set of non-abstaining verdicts `V`:
 
-```
-score = 100 · ( ( Σᵥ stance(v)·w(v)·conf(v) / Σᵥ w(v)·conf(v) ) + 1 ) / 2
+```text
+support = 100 · ( ( Σᵥ stance(v)·w(v)·conf(v) / Σᵥ w(v) ) + 1 ) / 2
 ```
 
 where `w(v)` is the council's structural weight and `conf(v)` is its
-self-reported confidence clamped to [0, 1].
+self-reported confidence clamped to [0, 1]. Confidence appears **only in the
+numerator**: a low-confidence stance attenuates toward the neutral 50 rather
+than normalizing back to certainty (a lone 0.01-confidence endorsement scores
+~50, not 100).
 
 Properties (all unit-tested):
 
-- 100 ⇔ unanimous full-confidence endorsement; 0 ⇔ unanimous opposition
-- All-abstain or empty ⇒ 50 (no signal, not agreement)
-- Confidence discounts influence: a hesitant oppose moves the score less
-  than a confident one
+- 100 ⇔ unanimous full-confidence endorsement; 0 ⇔ unanimous full-confidence
+  opposition
+- All-abstain or empty ⇒ 50 (no signal)
+- Confidence attenuates influence toward 50: a hesitant stance moves the score
+  less than a confident one
 - Council weights bias the score toward Risk and Ethics & Safety
+
+**Agreement score** — how much the councils agree *with each other*, independent
+of direction. Computed from the weighted dispersion of stance values:
+
+```text
+agreement = 100 · ( 1 − min(1, √(weighted variance of stance values)) )
+```
+
+Unanimous opposition and unanimous endorsement both score 100. A full
+endorse/oppose split scores near 0. All-abstain ⇒ 50.
 
 ### Bands
 
-| Score | Band |
+Bands classify the **agreement** score (not the directional support score), so
+unanimous opposition is correctly banded `unanimous`. Boundaries are half-open —
+a value belongs to the highest band whose threshold it meets, so fractional
+values such as 69.5 and 89.5 are well-defined (89.5 → strong, 90.0 → unanimous):
+
+| Agreement | Band |
 |---|---|
 | ≥ 90 | unanimous |
-| 70–89 | strong |
-| 45–69 | split |
+| ≥ 70 and < 90 | strong |
+| ≥ 45 and < 70 | split |
 | < 45 | contested |
 
 ## 3. Contradiction detection
@@ -61,7 +85,7 @@ Risk flags carry severity weights: low = 1, medium = 3, high = 7, critical = 15.
 The composite uses a saturating exponential so that many small flags matter but
 one critical dominates:
 
-```
+```text
 riskScore = 100 · (1 − e^(−Σ weights / 15))
 ```
 

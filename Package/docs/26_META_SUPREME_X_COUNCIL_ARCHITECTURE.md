@@ -30,7 +30,7 @@ one decision, preserving dissent on the record.
 
 ## Deliberation protocol
 
-```
+```text
 Phase 1 — INDEPENDENT ANALYSIS
   All councils receive the question in parallel, in isolation.
   Each returns a structured verdict:

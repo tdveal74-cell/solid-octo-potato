@@ -9,14 +9,14 @@ export const maxDuration = 300;
 const FactorSchema = z.number().min(0).max(10);
 
 const BodySchema = z.object({
-  role: z.string().min(2),
-  industry: z.string().optional(),
+  role: z.string().min(2).max(200),
+  industry: z.string().max(200).optional(),
   yearsExperience: z.number().min(0).max(60).optional(),
-  goals: z.string().optional(),
+  goals: z.string().max(2000).optional(),
   tasks: z
     .array(
       z.object({
-        name: z.string().min(1),
+        name: z.string().min(1).max(200),
         timeShare: z.number().min(0).max(100),
         factors: z.object({
           routineness: FactorSchema,

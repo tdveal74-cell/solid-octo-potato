@@ -22,7 +22,7 @@ export default function Home() {
           that analyze independently, debate, and surface their disagreements
           before a recommendation ever reaches you.
         </p>
-        <div className="mt-10 flex gap-4">
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
           <Link
             href="/audit"
             className="rounded-sm bg-brass px-6 py-3 text-sm font-medium text-ink hover:bg-brass-dim"

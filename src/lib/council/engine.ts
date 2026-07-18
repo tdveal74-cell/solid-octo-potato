@@ -102,7 +102,7 @@ async function synthesize(
     messages: [
       {
         role: "user",
-        content: `QUESTION:\n${question}\n\nFINAL COUNCIL VERDICTS:\n${digestVerdicts(verdicts)}\n\nCOMPUTED METRICS:\nConsensus score: ${consensus.score}/100 (${consensus.band})\nAggregate risk: ${consensus.aggregateRisk.score}/100 (highest severity: ${consensus.aggregateRisk.highestSeverity ?? "none"})\nContradictions:\n${contradictionText}\n\nIssue the final recommendation.`,
+        content: `QUESTION:\n${question}\n\nFINAL COUNCIL VERDICTS:\n${digestVerdicts(verdicts)}\n\nCOMPUTED METRICS:\nSupport for proposal: ${consensus.score}/100 (100 = full endorse, 0 = full oppose)\nInter-council agreement: ${consensus.agreement}/100 (${consensus.band})\nAggregate risk: ${consensus.aggregateRisk.score}/100 (highest severity: ${consensus.aggregateRisk.highestSeverity ?? "none"})\nContradictions:\n${contradictionText}\n\nIssue the final recommendation.`,
       },
     ],
     output_config: { format: zodOutputFormat(RecommendationSchema) },
