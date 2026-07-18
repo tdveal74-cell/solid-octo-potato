@@ -198,6 +198,14 @@ begin
     execute $p$ create policy "own runs"     on agent_runs          for all using (profile_id = auth.uid()) $p$;
     execute $p$ create policy "own memory"   on user_memories       for all using (profile_id = auth.uid()) $p$;
     execute $p$ create policy "own docs"     on knowledge_documents for all using (owner_id = auth.uid()) $p$;
+    -- Chunks inherit access from their parent document so match_chunks()
+    -- works under normal anon/auth roles, not just service-role RPCs.
+    execute $p$ create policy "own chunks"   on knowledge_chunks    for all using (
+      exists (
+        select 1 from knowledge_documents kd
+        where kd.id = knowledge_chunks.document_id and kd.owner_id = auth.uid()
+      )
+    ) $p$;
     execute $p$ create policy "own content"  on content_pieces      for all using (profile_id = auth.uid()) $p$;
   end if;
 exception when duplicate_object then null;

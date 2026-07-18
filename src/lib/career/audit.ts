@@ -44,7 +44,11 @@ export interface AuditResult {
   securityScore: number;
   band: "low" | "moderate" | "elevated" | "high";
   tasks: TaskScore[];
-  /** Tasks to deliberately concentrate time on (lowest exposure, highest leverage). */
+  /**
+   * Tasks to deliberately concentrate time on (lowest exposure, highest
+   * leverage). Automate-band tasks never appear here; empty when every task
+   * in the role is in the automate band.
+   */
   humanLeverage: string[];
   /** Tasks likely to be automated first (highest exposure). */
   automationFront: string[];
@@ -110,21 +114,27 @@ export function runAudit(tasks: TaskInput[]): AuditResult {
     scored.reduce((s, t) => s + t.exposure * (t.timeShare / 100), 0)
   );
 
-  // Split the safety-sorted list so the two headline lists never overlap,
-  // even for roles decomposed into only two or three tasks.
+  // Headline lists. Only tasks outside the automate band qualify as
+  // "double down here" advice — recommending a fully-automatable task as
+  // leverage would be the opposite of the audit's guidance. When every task
+  // is in the automate band, humanLeverage is empty (the UI surfaces that as
+  // its own finding). The two lists never share a task.
   const bySafety = [...scored].sort((a, b) => a.exposure - b.exposure);
-  const leverageCount = Math.min(3, Math.ceil(bySafety.length / 2));
-  const frontCount = Math.min(3, bySafety.length - leverageCount);
+  const leverageEligible = bySafety.filter((t) => t.classification !== "automate");
+  const leverageCount = Math.min(3, Math.ceil(bySafety.length / 2), leverageEligible.length);
+  const humanLeverage = leverageEligible.slice(0, leverageCount).map((t) => t.name);
+  const frontPool = bySafety.filter((t) => !humanLeverage.includes(t.name));
+  const automationFront = frontPool
+    .slice(Math.max(0, frontPool.length - 3))
+    .reverse()
+    .map((t) => t.name);
   return {
     exposureScore,
     securityScore: round1(100 - exposureScore),
     band: exposureBand(exposureScore),
     tasks: scored,
-    humanLeverage: bySafety.slice(0, leverageCount).map((t) => t.name),
-    automationFront: bySafety
-      .slice(bySafety.length - frontCount)
-      .reverse()
-      .map((t) => t.name),
+    humanLeverage,
+    automationFront,
   };
 }
 

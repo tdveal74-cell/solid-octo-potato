@@ -176,11 +176,19 @@ export default function AuditPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-sm border border-ink-border p-5">
               <p className="text-xs uppercase tracking-widest text-signal-green">Double down here</p>
-              <ul className="mt-3 space-y-1 text-sm text-fog">
-                {audit.humanLeverage.map((t) => (
-                  <li key={t}>▸ {t}</li>
-                ))}
-              </ul>
+              {audit.humanLeverage.length > 0 ? (
+                <ul className="mt-3 space-y-1 text-sm text-fog">
+                  {audit.humanLeverage.map((t) => (
+                    <li key={t}>▸ {t}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-fog-dim">
+                  No safe harbor: every task you listed sits in the automate
+                  band. The move here is repositioning — adding genuinely
+                  human-leverage work to the role — not defending current tasks.
+                </p>
+              )}
             </div>
             <div className="rounded-sm border border-ink-border p-5">
               <p className="text-xs uppercase tracking-widest text-signal-red">Automation front</p>

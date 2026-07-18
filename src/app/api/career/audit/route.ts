@@ -28,7 +28,10 @@ const BodySchema = z.object({
       })
     )
     .min(1)
-    .max(20),
+    .max(20)
+    .refine((tasks) => tasks.reduce((s, t) => s + t.timeShare, 0) > 0, {
+      message: "Task time shares must sum to a positive number",
+    }),
   /** When true (and AI is configured), also generate the roadmap. */
   includeRoadmap: z.boolean().optional(),
 });
@@ -44,8 +47,17 @@ export async function POST(request: Request) {
 
   const { tasks, includeRoadmap, ...profile } = parsed.data;
 
-  // The audit itself is deterministic — no API key required.
-  const audit = runAudit(tasks);
+  // The audit itself is deterministic — no API key required. Input problems
+  // the schema can't express (belt-and-suspenders) surface as 400, not 500.
+  let audit;
+  try {
+    audit = runAudit(tasks);
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Invalid audit input" },
+      { status: 400 }
+    );
+  }
 
   if (!includeRoadmap) {
     return NextResponse.json({ audit, roadmap: null });
