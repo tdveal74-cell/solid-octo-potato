@@ -45,4 +45,19 @@ describe("routeByKeywords", () => {
     expect(route.confidence).toBeLessThanOrEqual(1);
     expect(route.confidence).toBeGreaterThan(0);
   });
+
+  it("a single short trigger clears the orchestrator's 0.5 acceptance gate", () => {
+    // "help" (customer-success) is a lone 4-char trigger — the keyword pass
+    // must be confident enough to be accepted, not silently dropped to the LLM.
+    const route = routeByKeywords("Can you help me get value from this?");
+    expect(route.agentId).toBe("customer-success");
+    expect(route.method).toBe("keyword");
+    expect(route.confidence).toBeGreaterThanOrEqual(0.5);
+  });
+
+  it("a specific multi-word trigger saturates toward full confidence", () => {
+    const route = routeByKeywords("Will AI take my job as an accountant?");
+    expect(route.agentId).toBe("job-security-audit");
+    expect(route.confidence).toBeGreaterThan(0.9);
+  });
 });

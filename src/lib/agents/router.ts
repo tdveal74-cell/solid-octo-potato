@@ -41,7 +41,10 @@ export function routeByKeywords(input: string): RouteDecision {
     return { agentId: "research-intelligence", confidence: 0, method: "default" };
   }
 
-  // Saturating confidence: a single short trigger ≈ 0.5; multiple/specific ≈ →1.
-  const confidence = Math.min(1, best.score / 40);
+  // Any curated-trigger match is a deliberate signal, so it clears the
+  // orchestrator's 0.5 acceptance gate; longer/multiple matches saturate
+  // toward 1. (`best.score` is words×chars of the matched triggers, so a lone
+  // short trigger ≈ 5 → ~0.58, "job security" ≈ 24 → ~0.9.)
+  const confidence = Math.min(1, 0.5 + best.score / 60);
   return { agentId: best.agentId, confidence, method: "keyword" };
 }
