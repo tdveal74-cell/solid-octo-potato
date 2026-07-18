@@ -55,7 +55,11 @@ Errors: 400 invalid body, 503 AI unconfigured, 500 deliberation failure.
 Request: `{ input: string, agentId?, memory?: string[], councilReview?: boolean }`
 Routing: keyword pass (zero-cost) → utility-model classification when
 confidence < 0.5 → explicit `agentId` bypasses both.
-Response: `{ agentId, route, output, council | null }`.
+Response: `{ agentId, route, status, output, council | null }`.
+Council gate: for reviewed outputs, a `reject`/`revise` recommendation sets
+`status: "held"` and replaces `output` with a hold notice (the raw text is
+withheld); the `council` payload carries the rationale. Approved or unreviewed
+outputs return `status: "delivered"` with the agent text.
 
 ### `POST /api/career/audit`
 Request: role/profile + `tasks[]` (each: name, timeShare, five 0–10 factors).
