@@ -39,6 +39,11 @@ export interface OrchestratorResponse {
    * `council.recommendation` for the rationale and required revisions.
    */
   output: string;
+  /**
+   * The deliberation, if the output was reviewed. For held responses its
+   * `question` is redacted so the blocked agent text can't leak through it;
+   * the verdicts and recommendation are retained.
+   */
   council: DeliberationResult | null;
 }
 
@@ -46,20 +51,31 @@ export interface OrchestratorResponse {
  * Council gate: high-stakes output is reviewed *before* delivery. A `reject`
  * or `revise` decision withholds the agent text (replacing it with a notice);
  * `proceed` / `proceed_with_conditions` / no review deliver it unchanged.
- * Pure function of the deliberation result so it is unit-testable.
+ *
+ * The withholding is total: the review prompt echoed back in
+ * `DeliberationResult.question` embeds the raw agent output, so for held
+ * responses that field is redacted too — otherwise the blocked text would
+ * leak through the returned `council` payload. The Council's own analysis
+ * (verdicts, recommendation) is retained: it explains *why* the output was
+ * held and what revisions are required. Pure function so it is unit-testable.
  */
 export function applyCouncilGate(
   output: string,
   council: DeliberationResult | null
-): { status: "delivered" | "held"; output: string } {
+): { status: "delivered" | "held"; output: string; council: DeliberationResult | null } {
   const decision = council?.recommendation.decision;
-  if (decision === "reject" || decision === "revise") {
+  if (council && (decision === "reject" || decision === "revise")) {
     return {
       status: "held",
       output: `This response was held by the META SUPREME X Council (decision: ${decision}). See the council recommendation for the rationale and required revisions before it can be delivered.`,
+      council: {
+        ...council,
+        question:
+          "[withheld] The reviewed output was not approved for delivery; see recommendation for details.",
+      },
     };
   }
-  return { status: "delivered", output };
+  return { status: "delivered", output, council };
 }
 
 const RouteSchema = z.object({
@@ -139,6 +155,8 @@ export async function orchestrate(request: OrchestratorRequest): Promise<Orchest
   }
 
   // 4. Gate delivery on the Council's decision (reject/revise → withhold).
+  //    The gate also redacts the council payload so the blocked text can't
+  //    leak through DeliberationResult.question.
   const gated = applyCouncilGate(output, council);
-  return { agentId, route, status: gated.status, output: gated.output, council };
+  return { agentId, route, status: gated.status, output: gated.output, council: gated.council };
 }
