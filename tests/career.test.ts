@@ -103,6 +103,15 @@ describe("runAudit", () => {
     expect(result.automationFront[0]).toBe("Data entry");
   });
 
+  it("never recommends an automate-band task as human leverage", () => {
+    const allAutomatable = runAudit([
+      { name: "Data entry", timeShare: 60, factors: FULLY_AUTOMATABLE },
+      { name: "Invoice matching", timeShare: 40, factors: { ...FULLY_AUTOMATABLE, creativity: 1 } },
+    ]);
+    expect(allAutomatable.humanLeverage).toEqual([]);
+    expect(allAutomatable.automationFront.length).toBeGreaterThan(0);
+  });
+
   it("never lists the same task in both headline lists", () => {
     const two = runAudit(tasks.slice(0, 2));
     const overlap = two.humanLeverage.filter((t) => two.automationFront.includes(t));
