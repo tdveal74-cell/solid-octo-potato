@@ -7,6 +7,8 @@ export interface StatusPillProps extends HTMLAttributes<HTMLSpanElement> {
   tone?: "green" | "amber" | "red" | "brass" | "neutral";
   /** `md` (default) for page headers; `sm` for inline badges on cards. */
   size?: "md" | "sm";
+  /** Leading status dot in the tone color — for live/system states. */
+  dot?: boolean;
 }
 
 /**
@@ -16,6 +18,7 @@ export interface StatusPillProps extends HTMLAttributes<HTMLSpanElement> {
 export function StatusPill({
   tone = "neutral",
   size = "md",
+  dot = false,
   className,
   children,
   ...rest
@@ -25,6 +28,7 @@ export function StatusPill({
       className={cx("qo-pill", `qo-pill--${tone}`, size === "sm" && "qo-pill--sm", className)}
       {...rest}
     >
+      {dot && <span className="qo-pill__dot" aria-hidden="true" />}
       {children}
     </span>
   );

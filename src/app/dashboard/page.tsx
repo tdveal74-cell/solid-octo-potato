@@ -18,7 +18,7 @@ export default function Dashboard() {
           title="Operations"
           description="META SUPREME X system status and entry points."
         />
-        <StatusPill tone={configured ? "green" : "amber"}>
+        <StatusPill tone={configured ? "green" : "amber"} dot>
           {configured ? "intelligence online" : "api key required"}
         </StatusPill>
       </div>

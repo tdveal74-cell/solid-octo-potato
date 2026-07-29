@@ -1,7 +1,11 @@
 import { StatusPill } from "quiet-operator";
 
 export function Online() {
-  return <StatusPill tone="green">intelligence online</StatusPill>;
+  return (
+    <StatusPill tone="green" dot>
+      intelligence online
+    </StatusPill>
+  );
 }
 
 export function Tones() {

@@ -86,9 +86,24 @@
   color: var(--color-signal-red);
 }
 
+.qo-btn--primary:not(:disabled):active {
+  background: var(--color-brass-dim);
+}
+
+.qo-btn--outline:not(:disabled):active {
+  border-color: var(--color-brass-dim);
+}
+
 .qo-btn:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+.qo-btn:focus-visible,
+.qo-checkbox input:focus-visible,
+.qo-range-field input:focus-visible {
+  outline: 1px solid var(--color-brass);
+  outline-offset: 2px;
 }
 
 /* ------------------------------------------------------------------ Card */
@@ -113,6 +128,15 @@
 
 .qo-card--interactive:hover {
   border-color: var(--color-brass);
+}
+
+/* Keyboard parity for link-wrapped cards. */
+a:focus-visible > .qo-card--interactive {
+  border-color: var(--color-brass);
+}
+
+a:has(> .qo-card--interactive):focus-visible {
+  outline: none;
 }
 
 .qo-card--pad-xs {
@@ -182,6 +206,16 @@
 .qo-pill--neutral { border-color: var(--color-ink-border); color: var(--color-fog-dim); }
 .qo-pill--brass   { border-color: var(--color-brass-dim); color: var(--color-brass); }
 
+.qo-pill__dot {
+  display: inline-block;
+  width: 0.375em;
+  height: 0.375em;
+  margin-right: 0.5em;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 0.06em;
+}
+
 /* ------------------------------------------------------------------ Stat */
 
 .qo-stat--center {
@@ -193,6 +227,7 @@
   font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 400;
+  font-variant-numeric: tabular-nums;
   line-height: 1.2;
   color: var(--color-brass);
 }
@@ -291,6 +326,7 @@
   font-family: var(--font-body);
   font-size: 0.875rem;
   color: var(--color-fog);
+  transition: border-color 150ms;
 }
 
 .qo-input--sm {
@@ -403,6 +439,7 @@ textarea.qo-input {
 
 .qo-table-wrap {
   overflow-x: auto;
+  scrollbar-color: var(--color-ink-border) transparent;
 }
 
 .qo-table {
@@ -428,4 +465,38 @@ textarea.qo-input {
 
 .qo-table tbody tr {
   border-top: 1px solid var(--color-ink-border);
+}
+
+.qo-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+.qo-table th.qo-table--right,
+.qo-table td.qo-table--right {
+  text-align: right;
+}
+
+.qo-table th.qo-table--center,
+.qo-table td.qo-table--center {
+  text-align: center;
+}
+
+.qo-table__empty {
+  padding: 1.25rem 0;
+  font-size: 0.875rem;
+  color: var(--color-fog-dim);
+}
+
+/* ---------------------------------------------------------------- Motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .qo-btn,
+  .qo-card,
+  .qo-input {
+    transition: none;
+  }
+
+  .qo-notice--pulse {
+    animation: none;
+  }
 }

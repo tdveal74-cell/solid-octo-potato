@@ -221,6 +221,7 @@ export default function AuditPage() {
             </Eyebrow>
             <DataTable
               className="mt-3"
+              align={["left", "right", "right", "left"]}
               columns={["Task", "Time", "Exposure", "Classification"]}
               rows={audit.tasks.map((t) => [
                 t.name,
