@@ -1,0 +1,32 @@
+/* The Quiet Operator — brand tokens.
+   Single source of truth for the palette and type stacks. Consumed by
+   components.css and by Tailwind via @theme inline in app/globals.css. */
+
+:root {
+  --color-ink: #0b0d11;
+  --color-ink-raised: #12151c;
+  --color-ink-border: #232836;
+  --color-fog: #e8e6e1;
+  --color-fog-dim: #9a9891;
+  --color-brass: #c9a96a;
+  --color-brass-dim: #8a7448;
+  --color-signal-green: #6fbf8f;
+  --color-signal-amber: #d8a45a;
+  --color-signal-red: #c96a6a;
+
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "Cascadia Code", Menlo, monospace;
+}
+
+html {
+  background: var(--color-ink);
+  color: var(--color-fog);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-brass);
+  color: var(--color-ink);
+}

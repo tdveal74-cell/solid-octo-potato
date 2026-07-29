@@ -2,6 +2,18 @@
 
 import { useState } from "react";
 import type { AuditResult, TaskInput } from "@/lib/career/audit";
+import {
+  ArrowList,
+  Button,
+  Card,
+  DataTable,
+  Eyebrow,
+  Field,
+  Notice,
+  RangeField,
+  SectionHeader,
+  TextInput,
+} from "@/components";
 
 interface TaskRow extends TaskInput {
   key: number;
@@ -75,167 +87,151 @@ export default function AuditPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
-      <h1 className="font-[family-name:var(--font-display)] text-4xl text-fog">
-        Job Security Audit
-      </h1>
-      <p className="mt-3 max-w-2xl text-fog-dim">
-        Your job title doesn&rsquo;t get automated — your tasks do. Break your role into
-        tasks, rate each one, and get a deterministic AI-exposure score with the
-        tasks worth doubling down on.
-      </p>
+      <SectionHeader
+        title="Job Security Audit"
+        description="Your job title doesn't get automated — your tasks do. Break your role into tasks, rate each one, and get a deterministic AI-exposure score with the tasks worth doubling down on."
+      />
 
       <form onSubmit={submit} className="mt-10 space-y-6">
-        <div>
-          <label htmlFor="audit-role" className="block text-sm text-fog">
-            Your role
-          </label>
-          <input
+        <Field label="Your role" htmlFor="audit-role">
+          <TextInput
             id="audit-role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             placeholder="e.g. Senior Financial Analyst"
-            className="mt-2 w-full rounded-sm border border-ink-border bg-ink-raised p-3 text-sm text-fog placeholder:text-fog-dim focus:border-brass focus:outline-none"
           />
-        </div>
+        </Field>
 
         {tasks.map((task, i) => (
-          <div key={task.key} className="rounded-sm border border-ink-border p-5">
+          <Card key={task.key}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <label htmlFor={`task-name-${task.key}`} className="sr-only">
                 Task {i + 1} name
               </label>
-              <input
+              <TextInput
                 id={`task-name-${task.key}`}
+                inputSize="sm"
                 value={task.name}
                 onChange={(e) => updateTask(task.key, { name: e.target.value })}
                 placeholder={`Task ${i + 1}, e.g. "Monthly variance reporting"`}
-                className="flex-1 rounded-sm border border-ink-border bg-ink-raised p-2.5 text-sm text-fog placeholder:text-fog-dim focus:border-brass focus:outline-none"
+                className="flex-1"
               />
-              <label htmlFor={`task-time-${task.key}`} className="flex items-center gap-2 text-xs text-fog-dim">
+              <label
+                htmlFor={`task-time-${task.key}`}
+                className="flex items-center gap-2 text-xs text-fog-dim"
+              >
                 % of time
-                <input
+                <TextInput
                   id={`task-time-${task.key}`}
+                  inputSize="sm"
                   type="number"
                   min={0}
                   max={100}
                   value={task.timeShare}
                   onChange={(e) => updateTask(task.key, { timeShare: Number(e.target.value) })}
-                  className="w-16 rounded-sm border border-ink-border bg-ink-raised p-2 text-sm text-fog"
+                  className="w-16"
                 />
               </label>
               {tasks.length > 1 && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost-danger"
                   onClick={() => setTasks((ts) => ts.filter((t) => t.key !== task.key))}
-                  className="text-xs text-fog-dim hover:text-signal-red"
                 >
                   remove
-                </button>
+                </Button>
               )}
             </div>
             <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
               {FACTOR_LABELS.map(({ key, label, hint }) => (
-                <label key={key} className="text-xs text-fog-dim">
-                  <span className="block text-fog">{label}: {task.factors[key]}</span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={10}
-                    value={task.factors[key]}
-                    onChange={(e) => updateFactor(task.key, key, Number(e.target.value))}
-                    className="mt-1 w-full accent-[#c9a96a]"
-                  />
-                  <span className="mt-1 block text-[10px]">{hint}</span>
-                </label>
+                <RangeField
+                  key={key}
+                  label={label}
+                  valueLabel={task.factors[key]}
+                  hint={hint}
+                  min={0}
+                  max={10}
+                  value={task.factors[key]}
+                  onChange={(e) => updateFactor(task.key, key, Number(e.target.value))}
+                />
               ))}
             </div>
-          </div>
+          </Card>
         ))}
 
         <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setTasks((ts) => [...ts, blankTask()])}
-            className="text-sm text-brass hover:text-fog"
-          >
+          <Button variant="ghost" onClick={() => setTasks((ts) => [...ts, blankTask()])}>
             + Add task
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
+            size="sm"
             disabled={loading || !role.trim() || tasks.some((t) => !t.name.trim())}
-            className="rounded-sm bg-brass px-6 py-2.5 text-sm font-medium text-ink disabled:opacity-40"
           >
             {loading ? "Scoring…" : "Run audit"}
-          </button>
+          </Button>
         </div>
       </form>
 
-      {error && <p className="mt-8 text-sm text-signal-red">{error}</p>}
+      {error && (
+        <Notice tone="red" className="mt-8">
+          {error}
+        </Notice>
+      )}
 
       {audit && (
         <div className="mt-12 space-y-6">
-          <div className="rounded-sm border border-brass-dim bg-ink-raised p-6 text-center">
-            <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-fog-dim">
-              AI exposure
-            </p>
-            <p className={`mt-2 font-[family-name:var(--font-display)] text-6xl ${BAND_COLOR[audit.band]}`}>
+          <Card variant="accent" padding="md" className="text-center">
+            <Eyebrow tone="dim">AI exposure</Eyebrow>
+            <p
+              className={`mt-2 font-[family-name:var(--font-display)] text-6xl ${BAND_COLOR[audit.band]}`}
+            >
               {audit.exposureScore}
             </p>
-            <p className="mt-1 text-sm capitalize text-fog-dim">{audit.band} exposure · security score {audit.securityScore}</p>
-          </div>
+            <p className="mt-1 text-sm capitalize text-fog-dim">
+              {audit.band} exposure · security score {audit.securityScore}
+            </p>
+          </Card>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-sm border border-ink-border p-5">
-              <p className="text-xs uppercase tracking-widest text-signal-green">Double down here</p>
+            <Card>
+              <Eyebrow size="sm" mono={false} tone="green">
+                Double down here
+              </Eyebrow>
               {audit.humanLeverage.length > 0 ? (
-                <ul className="mt-3 space-y-1 text-sm text-fog">
-                  {audit.humanLeverage.map((t, i) => (
-                    <li key={`${i}-${t}`}>▸ {t}</li>
-                  ))}
-                </ul>
+                <ArrowList className="mt-3" items={audit.humanLeverage} />
               ) : (
-                <p className="mt-3 text-sm text-fog-dim">
-                  No safe harbor: every task you listed sits in the automate
-                  band. The move here is repositioning — adding genuinely
-                  human-leverage work to the role — not defending current tasks.
-                </p>
+                <Notice tone="dim" className="mt-3">
+                  No safe harbor: every task you listed sits in the automate band. The
+                  move here is repositioning — adding genuinely human-leverage work to
+                  the role — not defending current tasks.
+                </Notice>
               )}
-            </div>
-            <div className="rounded-sm border border-ink-border p-5">
-              <p className="text-xs uppercase tracking-widest text-signal-red">Automation front</p>
-              <ul className="mt-3 space-y-1 text-sm text-fog">
-                {audit.automationFront.map((t, i) => (
-                  <li key={`${i}-${t}`}>▸ {t}</li>
-                ))}
-              </ul>
-            </div>
+            </Card>
+            <Card>
+              <Eyebrow size="sm" mono={false} tone="red">
+                Automation front
+              </Eyebrow>
+              <ArrowList className="mt-3" items={audit.automationFront} />
+            </Card>
           </div>
 
-          <div className="rounded-sm border border-ink-border p-5">
-            <p className="text-xs uppercase tracking-widest text-fog-dim">Task breakdown</p>
-            <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[28rem] text-left text-sm">
-              <thead className="text-xs text-fog-dim">
-                <tr>
-                  <th className="py-2 font-normal">Task</th>
-                  <th className="py-2 font-normal">Time</th>
-                  <th className="py-2 font-normal">Exposure</th>
-                  <th className="py-2 font-normal">Classification</th>
-                </tr>
-              </thead>
-              <tbody>
-                {audit.tasks.map((t, i) => (
-                  <tr key={`${i}-${t.name}`} className="border-t border-ink-border text-fog">
-                    <td className="py-2">{t.name}</td>
-                    <td className="py-2">{t.timeShare}%</td>
-                    <td className="py-2">{t.exposure}</td>
-                    <td className="py-2 capitalize">{t.classification.replace("-", " ")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          </div>
+          <Card>
+            <Eyebrow size="sm" mono={false} tone="dim">
+              Task breakdown
+            </Eyebrow>
+            <DataTable
+              className="mt-3"
+              columns={["Task", "Time", "Exposure", "Classification"]}
+              rows={audit.tasks.map((t) => [
+                t.name,
+                `${t.timeShare}%`,
+                t.exposure,
+                <span key="c" className="capitalize">
+                  {t.classification.replace("-", " ")}
+                </span>,
+              ])}
+            />
+          </Card>
         </div>
       )}
     </div>

@@ -1,0 +1,417 @@
+/* The Quiet Operator — component styles.
+   Plain CSS on the brand tokens (tokens.css); no framework required.
+   Every class is namespaced qo-*. Elements carry their own margins and
+   font metrics so the components render identically with or without a
+   global CSS reset. */
+
+@import "./tokens.css";
+
+/* ---------------------------------------------------------------- Button */
+
+.qo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-fog);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 150ms, border-color 150ms, color 150ms;
+}
+
+.qo-btn--sm {
+  padding: 0.625rem 1.5rem;
+}
+
+.qo-btn--primary {
+  background: var(--color-brass);
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+.qo-btn--primary:not(:disabled):hover {
+  background: var(--color-brass-dim);
+}
+
+.qo-btn--outline {
+  border-color: var(--color-ink-border);
+}
+
+.qo-btn--outline:not(:disabled):hover {
+  border-color: var(--color-brass);
+}
+
+.qo-btn--ghost,
+.qo-btn--ghost-danger {
+  border: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.qo-btn--ghost {
+  color: var(--color-brass);
+}
+
+.qo-btn--ghost:not(:disabled):hover {
+  color: var(--color-fog);
+}
+
+.qo-btn--ghost-danger {
+  font-size: 0.75rem;
+  color: var(--color-fog-dim);
+}
+
+.qo-btn--ghost-danger:not(:disabled):hover {
+  color: var(--color-signal-red);
+}
+
+.qo-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ Card */
+
+.qo-card {
+  display: block;
+  border: 1px solid var(--color-ink-border);
+  border-radius: 0.25rem;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 150ms;
+}
+
+.qo-card--raised,
+.qo-card--accent {
+  background: var(--color-ink-raised);
+}
+
+.qo-card--accent {
+  border-color: var(--color-brass-dim);
+}
+
+.qo-card--interactive:hover {
+  border-color: var(--color-brass);
+}
+
+.qo-card--pad-xs {
+  padding: 0.75rem 1rem;
+}
+
+.qo-card--pad-sm {
+  padding: 1.25rem;
+}
+
+.qo-card--pad-md {
+  padding: 1.5rem;
+}
+
+/* --------------------------------------------------------------- Eyebrow */
+
+.qo-eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.qo-eyebrow--sm {
+  font-size: 0.75rem;
+}
+
+.qo-eyebrow--sans {
+  font-family: var(--font-body);
+}
+
+.qo-eyebrow--wide {
+  letter-spacing: 0.3em;
+}
+
+.qo-eyebrow--brass { color: var(--color-brass); }
+.qo-eyebrow--dim   { color: var(--color-fog-dim); }
+.qo-eyebrow--fog   { color: var(--color-fog); }
+.qo-eyebrow--green { color: var(--color-signal-green); }
+.qo-eyebrow--amber { color: var(--color-signal-amber); }
+.qo-eyebrow--red   { color: var(--color-signal-red); }
+
+/* ------------------------------------------------------------ StatusPill */
+
+.qo-pill {
+  display: inline-block;
+  border: 1px solid;
+  border-radius: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.qo-pill--sm {
+  padding: 0.125rem 0.375rem;
+  font-size: 0.5625rem;
+}
+
+.qo-pill--green   { border-color: var(--color-signal-green); color: var(--color-signal-green); }
+.qo-pill--amber   { border-color: var(--color-signal-amber); color: var(--color-signal-amber); }
+.qo-pill--red     { border-color: var(--color-signal-red); color: var(--color-signal-red); }
+.qo-pill--neutral { border-color: var(--color-ink-border); color: var(--color-fog-dim); }
+.qo-pill--brass   { border-color: var(--color-brass-dim); color: var(--color-brass); }
+
+/* ------------------------------------------------------------------ Stat */
+
+.qo-stat--center {
+  text-align: center;
+}
+
+.qo-stat__value {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-brass);
+}
+
+.qo-stat--center .qo-stat__value {
+  font-size: 1.875rem;
+}
+
+.qo-stat__value--mono {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+}
+
+.qo-stat__sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--color-fog-dim);
+}
+
+/* --------------------------------------------------------- SectionHeader */
+
+.qo-heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-fog);
+}
+
+.qo-heading--1 {
+  font-size: 2.25rem;
+}
+
+.qo-heading--1.qo-heading--lg {
+  font-size: 3rem;
+}
+
+.qo-heading--2 {
+  font-size: 1.875rem;
+}
+
+.qo-heading--3 {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.qo-section-header .qo-eyebrow + .qo-heading {
+  margin-top: 1.5rem;
+}
+
+.qo-section-header__desc {
+  margin: 0.75rem 0 0;
+  max-width: 42rem;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: var(--color-fog-dim);
+}
+
+.qo-section-header--lg .qo-heading {
+  max-width: 48rem;
+}
+
+.qo-section-header--lg .qo-section-header__desc {
+  font-size: 1.125rem;
+}
+
+/* ----------------------------------------------------------------- Forms */
+
+.qo-field__label {
+  display: block;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-fog);
+}
+
+.qo-field__label + * {
+  margin-top: 0.5rem;
+}
+
+.qo-field__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.625rem;
+  color: var(--color-fog-dim);
+}
+
+.qo-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--color-ink-border);
+  border-radius: 0.25rem;
+  background: var(--color-ink-raised);
+  padding: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-fog);
+}
+
+.qo-input--sm {
+  padding: 0.625rem;
+}
+
+textarea.qo-input {
+  padding: 1rem;
+  resize: vertical;
+}
+
+.qo-input::placeholder {
+  color: var(--color-fog-dim);
+}
+
+.qo-input:focus {
+  border-color: var(--color-brass);
+  outline: none;
+}
+
+.qo-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-fog-dim);
+  cursor: pointer;
+}
+
+.qo-checkbox input {
+  accent-color: var(--color-brass);
+}
+
+.qo-range-field {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-fog-dim);
+}
+
+.qo-range-field__value {
+  display: block;
+  color: var(--color-fog);
+}
+
+.qo-range-field input[type="range"] {
+  display: block;
+  margin-top: 0.25rem;
+  width: 100%;
+  accent-color: var(--color-brass);
+}
+
+.qo-range-field__hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.625rem;
+}
+
+/* ---------------------------------------------------------------- Notice */
+
+.qo-notice {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+}
+
+.qo-notice--red   { color: var(--color-signal-red); }
+.qo-notice--amber { color: var(--color-signal-amber); }
+.qo-notice--green { color: var(--color-signal-green); }
+.qo-notice--brass { color: var(--color-brass); }
+.qo-notice--dim   { color: var(--color-fog-dim); }
+
+.qo-notice--pulse {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  animation: qo-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes qo-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ------------------------------------------------------------- ArrowList */
+
+.qo-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+}
+
+.qo-list > li + li {
+  margin-top: 0.25rem;
+}
+
+.qo-list--arrow > li::before { content: "\25B8\00A0"; }
+.qo-list--dash > li::before  { content: "\2014\00A0"; }
+
+.qo-list--fog   { color: var(--color-fog); }
+.qo-list--dim   { color: var(--color-fog-dim); }
+.qo-list--amber { color: var(--color-signal-amber); }
+.qo-list--green { color: var(--color-signal-green); }
+
+/* ------------------------------------------------------------- DataTable */
+
+.qo-table-wrap {
+  overflow-x: auto;
+}
+
+.qo-table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-fog);
+}
+
+.qo-table th {
+  padding: 0.5rem 1rem 0.5rem 0;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-fog-dim);
+}
+
+.qo-table td {
+  padding: 0.5rem 1rem 0.5rem 0;
+}
+
+.qo-table tbody tr {
+  border-top: 1px solid var(--color-ink-border);
+}

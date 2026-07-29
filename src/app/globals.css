@@ -1,31 +1,23 @@
 @import "tailwindcss";
+@import "../components/tokens.css";
+@import "../components/components.css";
 
-@theme {
-  /* The Quiet Operator brand system */
-  --color-ink: #0b0d11;
-  --color-ink-raised: #12151c;
-  --color-ink-border: #232836;
-  --color-fog: #e8e6e1;
-  --color-fog-dim: #9a9891;
-  --color-brass: #c9a96a;
-  --color-brass-dim: #8a7448;
-  --color-signal-green: #6fbf8f;
-  --color-signal-amber: #d8a45a;
-  --color-signal-red: #c96a6a;
+/* Map Tailwind utilities onto the brand tokens defined in
+   src/components/tokens.css (the single source of truth). `inline` keeps
+   Tailwind from re-emitting the custom properties. */
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-ink-raised: var(--color-ink-raised);
+  --color-ink-border: var(--color-ink-border);
+  --color-fog: var(--color-fog);
+  --color-fog-dim: var(--color-fog-dim);
+  --color-brass: var(--color-brass);
+  --color-brass-dim: var(--color-brass-dim);
+  --color-signal-green: var(--color-signal-green);
+  --color-signal-amber: var(--color-signal-amber);
+  --color-signal-red: var(--color-signal-red);
 
-  --font-display: Georgia, "Times New Roman", serif;
-  --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-mono: "SF Mono", "Cascadia Code", Menlo, monospace;
-}
-
-html {
-  background: var(--color-ink);
-  color: var(--color-fog);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-}
-
-::selection {
-  background: var(--color-brass);
-  color: var(--color-ink);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
 }
