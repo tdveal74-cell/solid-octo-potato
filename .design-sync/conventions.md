@@ -1,13 +1,14 @@
-# The Quiet Operator — build conventions
+# The Quiet Operator — build conventions (Ultra Quantum Flagship)
 
-Dark editorial system: ink surfaces, fog text, brass accents, serif display
-headings, mono microtype. Quiet, ruled, low-chrome — no gradients, no shadows,
-no rounded-corner softness beyond the 4px radius the components already carry.
+Cinematic ops-console system: near-black ink surfaces, warm gold accents with
+subtle glow, Space Grotesk type, wide-tracked mono microtype, hairline
+white-alpha rules, 10px radii. Restrained — glow marks live state and primary
+action, never decoration; no gradients.
 
 ## Wrap every screen in `Surface`
 
 Components are designed for the ink canvas and are **illegible on white**
-(fog text ≈ #e8e6e1). Always start with:
+(fog text ≈ #f2f0ea). Always start with:
 
 ```jsx
 import { Surface, SectionHeader, Button } from "quiet-operator";
@@ -24,7 +25,7 @@ import { Surface, SectionHeader, Button } from "quiet-operator";
 </Surface>
 ```
 
-`Surface` paints `--color-ink`, sets fog text and the body font stack.
+`Surface` paints `--color-ink`, sets fog text and the body type stack.
 `padded` defaults true; pass `padded={false}` when composing your own page
 padding (the app uses a 72rem centered column: `maxWidth: "72rem",
 margin: "0 auto", padding: "0 1.5rem"`).
@@ -37,18 +38,20 @@ flex/grid with rem gaps — and reference the design tokens as CSS variables:
 
 | Token | Value / use |
 |---|---|
-| `--color-ink` / `--color-ink-raised` / `--color-ink-border` | page bg / card bg / 1px rules |
+| `--color-ink` / `--color-ink-raised` / `--color-ink-border` | page bg / panel bg / hairline rules (white-alpha) |
 | `--color-fog` / `--color-fog-dim` | primary / secondary text |
-| `--color-brass` / `--color-brass-dim` | accent, CTAs / hover, accent borders |
-| `--color-signal-green` / `--color-signal-amber` / `--color-signal-red` | ok / warning / error |
-| `--font-display` | Georgia serif — headings only, weight 400 |
-| `--font-body` | Helvetica Neue — everything else |
-| `--font-mono` | SF Mono — microtype labels, ids, code |
+| `--color-brass` / `--color-brass-bright` / `--color-brass-dim` | gold accent, CTAs / hover+glow / muted gold borders |
+| `--color-signal-green` / `--color-signal-amber` / `--color-signal-red` | ok / warning / error (red is warm pink) |
+| `--color-signal-purple` / `--color-signal-cyan` | agent + metric accent colors |
+| `--font-display` | Space Grotesk — headings at weight 600, tight tracking |
+| `--font-body` | Space Grotesk — everything else, weights 300–500 |
+| `--font-mono` | IBM Plex Mono — microtype labels, ids, code |
 
-Signature moves: uppercase 10px mono labels (`Eyebrow`) above things; serif
-display headings at weight 400 (`SectionHeader`); 1px `--color-ink-border`
-rules to divide sections (`borderTop: "1px solid var(--color-ink-border)"`);
-signal colors only for state, brass for emphasis.
+Signature moves: uppercase 10px mono labels with 0.16em tracking (`Eyebrow`)
+above things; weight-600 display headings; hairline
+`1px solid var(--color-ink-border)` rules to divide sections; glow only on
+live-state dots and primary hover (`box-shadow: 0 0 8px currentColor`);
+signal colors only for state, gold for emphasis.
 
 ## Where the truth lives
 
@@ -62,5 +65,6 @@ Surface, SectionHeader, Eyebrow, Button, Card, Stat, StatusPill, Notice,
 ArrowList, DataTable, Field, TextInput, TextArea, Checkbox, RangeField.
 
 Compose forms as `Field` + `TextInput`/`TextArea`; status chips are
-`StatusPill` (lowercase text reads best); key figures are a grid of `Stat`;
-lists of conditions/dissent are `ArrowList` (`marker="arrow"` or `"dash"`).
+`StatusPill` (lowercase text; add `dot` for live states); key figures are a
+grid of `Stat`; lists of conditions/dissent are `ArrowList` (`marker="arrow"`
+or `"dash"`).

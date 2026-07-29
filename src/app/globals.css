@@ -13,9 +13,12 @@
   --color-fog-dim: var(--color-fog-dim);
   --color-brass: var(--color-brass);
   --color-brass-dim: var(--color-brass-dim);
+  --color-brass-bright: var(--color-brass-bright);
   --color-signal-green: var(--color-signal-green);
   --color-signal-amber: var(--color-signal-amber);
   --color-signal-red: var(--color-signal-red);
+  --color-signal-purple: var(--color-signal-purple);
+  --color-signal-cyan: var(--color-signal-cyan);
 
   --font-display: var(--font-display);
   --font-body: var(--font-body);

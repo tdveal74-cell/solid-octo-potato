@@ -1,22 +1,27 @@
-/* The Quiet Operator — brand tokens.
+/* The Quiet Operator — brand tokens (Ultra Quantum Flagship framework).
    Single source of truth for the palette and type stacks. Consumed by
    components.css and by Tailwind via @theme inline in app/globals.css. */
 
-:root {
-  --color-ink: #0b0d11;
-  --color-ink-raised: #12151c;
-  --color-ink-border: #232836;
-  --color-fog: #e8e6e1;
-  --color-fog-dim: #9a9891;
-  --color-brass: #c9a96a;
-  --color-brass-dim: #8a7448;
-  --color-signal-green: #6fbf8f;
-  --color-signal-amber: #d8a45a;
-  --color-signal-red: #c96a6a;
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 
-  --font-display: Georgia, "Times New Roman", serif;
-  --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-mono: "SF Mono", "Cascadia Code", Menlo, monospace;
+:root {
+  --color-ink: #07090d;
+  --color-ink-raised: #0c0f14;
+  --color-ink-border: rgba(255, 255, 255, 0.09);
+  --color-fog: #f2f0ea;
+  --color-fog-dim: #8a93a0;
+  --color-brass: #e8b24c;
+  --color-brass-dim: #8a6e10;
+  --color-brass-bright: #ffc878;
+  --color-signal-green: #2fbe86;
+  --color-signal-amber: #e0912e;
+  --color-signal-red: #ff8fa3;
+  --color-signal-purple: #b98cff;
+  --color-signal-cyan: #46d5e0;
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
 }
 
 html {
@@ -27,6 +32,6 @@ html {
 }
 
 ::selection {
-  background: var(--color-brass);
-  color: var(--color-ink);
+  background: rgba(232, 178, 76, 0.28);
+  color: #fff;
 }

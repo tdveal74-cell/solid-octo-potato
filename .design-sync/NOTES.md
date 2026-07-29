@@ -18,10 +18,19 @@
 
 ## Known render warns
 
-- `[FONT_MISSING] "Cascadia Code"` — intentional. The brand's type stacks are
-  system fonts (Georgia / Helvetica Neue / SF Mono, Cascadia Code, Menlo,
-  monospace); there are no font files to ship and the generic fallbacks always
-  resolve. Not a substitution to fix.
+- `[FONT_REMOTE] "Space Grotesk", "IBM Plex Mono"` — intentional. The Ultra
+  Quantum Flagship brand loads both families via a Google Fonts `@import` in
+  `src/components/tokens.css`; they resolve at runtime. Not a missing font.
+
+## Brand source
+
+- The visual language (Ultra Quantum Flagship: #07090d ink, #e8b24c/#ffc878
+  gold with glow, Space Grotesk + IBM Plex Mono, 10px radii, white-alpha
+  hairlines, signal green/pink/purple/cyan) was extracted from the user's
+  Claude Design project "Ultra quantum flagship build framework"
+  (02663c2a-e3e6-49fa-9bf6-915b84df7756), file
+  "The Quiet Operator - Flagship OS.dc.html". Restyle drift questions should
+  be settled against that file.
 
 ## Re-sync risks
 
