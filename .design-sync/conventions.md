@@ -25,7 +25,10 @@ import { Surface, SectionHeader, Button } from "quiet-operator";
 </Surface>
 ```
 
-`Surface` paints `--color-ink`, sets fog text and the body type stack.
+`Surface` paints the flagship canvas — radial-lit ink with a slowly drifting
+gold hairline grid — and sets fog text and the body type stack. The page-level
+stylesheet also applies the canvas (plus a scanline sweep) to `html`/`body`,
+so full-page designs get it automatically; never place content on flat white.
 `padded` defaults true; pass `padded={false}` when composing your own page
 padding (the app uses a 72rem centered column: `maxWidth: "72rem",
 margin: "0 auto", padding: "0 1.5rem"`).

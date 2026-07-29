@@ -25,10 +25,59 @@
 }
 
 html {
-  background: var(--color-ink);
+  background-color: var(--color-ink);
+  background-image: radial-gradient(120% 90% at 78% -8%, #10151d 0%, #0a0d12 42%, #07090d 100%);
+  background-attachment: fixed;
   color: var(--color-fog);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Flagship canvas texture: drifting gold hairline grid + scanline sweep. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(232, 178, 76, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 178, 76, 0.045) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.5;
+  animation: qo-grid 34s linear infinite;
+  pointer-events: none;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 38vh;
+  background: linear-gradient(180deg, transparent, rgba(232, 178, 76, 0.05), transparent);
+  mix-blend-mode: screen;
+  animation: qo-scan 9s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes qo-grid {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 0 -80px, -80px 0; }
+}
+
+@keyframes qo-scan {
+  0% { transform: translateY(-40vh); }
+  100% { transform: translateY(100vh); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+
+  body::after {
+    content: none;
+  }
 }
 
 ::selection {

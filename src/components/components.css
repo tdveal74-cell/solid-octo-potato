@@ -9,11 +9,27 @@
 /* --------------------------------------------------------------- Surface */
 
 .qo-surface {
+  position: relative;
   min-height: 100%;
-  background: var(--color-ink);
+  background-color: var(--color-ink);
+  background-image: radial-gradient(120% 90% at 78% -8%, #10151d 0%, #0a0d12 42%, #07090d 100%);
   color: var(--color-fog);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Same drifting gold grid as the page canvas, bounded to the surface. */
+.qo-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(232, 178, 76, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 178, 76, 0.045) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.5;
+  animation: qo-grid 34s linear infinite;
+  pointer-events: none;
 }
 
 .qo-surface--padded {
@@ -501,7 +517,8 @@ textarea.qo-input {
     transition: none;
   }
 
-  .qo-notice--pulse {
+  .qo-notice--pulse,
+  .qo-surface::before {
     animation: none;
   }
 }
