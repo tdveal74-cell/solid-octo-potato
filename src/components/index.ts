@@ -9,6 +9,7 @@ export { Notice, type NoticeProps } from "./Notice";
 export { RangeField, type RangeFieldProps } from "./RangeField";
 export { SectionHeader, type SectionHeaderProps } from "./SectionHeader";
 export { Stat, type StatProps } from "./Stat";
+export { Surface, type SurfaceProps } from "./Surface";
 export { StatusPill, type StatusPillProps } from "./StatusPill";
 export { TextArea, type TextAreaProps } from "./TextArea";
 export { TextInput, type TextInputProps } from "./TextInput";

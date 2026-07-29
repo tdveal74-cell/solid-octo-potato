@@ -1,0 +1,14 @@
+{
+  "projectId": "30e7d281-3914-42ee-a29f-9d5b6c3cee65",
+  "shape": "package",
+  "pkg": "quiet-operator",
+  "globalName": "QuietOperator",
+  "buildCmd": "npm run build:lib",
+  "cssEntry": "dist/styles.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "provider": { "component": "Surface", "props": { "padded": true } },
+  "overrides": {
+    "Stat": { "cardMode": "column" },
+    "RangeField": { "cardMode": "column" }
+  }
+}
