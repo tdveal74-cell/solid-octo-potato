@@ -1,64 +1,51 @@
-# How to Test — The Quiet Operator (solid-octo-potato)
+# How to test — solid-octo-potato (The Quiet Operator)
 
-This product is the furthest along. You can test it **today** offline.
-
-## 1. Install and run
+## Local app
 
 ```bash
-git clone https://github.com/tdveal74-cell/solid-octo-potato.git
-cd solid-octo-potato
 npm install
-cp .env.example .env.local   # optional: add ANTHROPIC_API_KEY for live Council
-npm run dev
+cp .env.example .env.local   # add ANTHROPIC_API_KEY for live AI
+npm run typecheck && npm run test && npm run build
+npm run dev                  # http://localhost:3000
 ```
 
-Open **http://localhost:3000**
+Offline without a key: landing, dashboard, deterministic Job Security Audit.
+With a key: Council, orchestrate, knowledge, content script helpers.
 
-## 2. Quality gates (must pass)
+## Content pipeline (n8n — TQO FINAL V5)
+
+The production content engine is the **active** n8n workflow:
+
+| Field | Value |
+|-------|-------|
+| Name | TQO FINAL V5 |
+| ID | `gsGJQan7a6ZufhYt` |
+| Nodes | **209** (198 functional + 11 sticky) |
+| Active | true |
+
+In-repo mirror: `docs/n8n/TQO_FINAL_V5.md`  
+TypeScript contracts: `src/lib/content/pipeline.ts`
+
+### Smoke checks on the live workflow
+
+1. **Pause is off** — hit `/webhook/system-resume` if unsure.
+2. **Script lane (TQO)** — PUT one Idea row in `tblx5CcNguOypBjLI`, wait for 06:00 or POST `/webhook/run-tqo-pipeline`.
+3. **Script lane (NCO)** — same on `tblhtxvB7xouDKpww` or POST `/webhook/run-nco-pipeline`.
+4. **Render** — row must reach Queued; claim → Voice Router → Pexels → self-hosted worker. Known-good render ~33–41 polls (~34–41 min). Cap is 75.
+5. **Human Review** — when Status=Ready, tick Human Review by hand. Nothing publishes without it.
+6. **OS 28** — publish gate must clear packaging, QC, disclosure, claim validity.
+
+### What the app layer tests
 
 ```bash
-npm run typecheck
-npm run test
-npm run build
+npm run test -- src/lib/content
 ```
 
-## 3. What works with zero API keys
+Asserts legal status transitions, brand table IDs, and prompt shape.
+Does not call n8n or Airtable.
 
-| Surface | URL | Notes |
-|---------|-----|-------|
-| Landing | `/` | Full brand + council overview |
-| Job Security Audit | `/audit` | Deterministic engine — fully offline |
-| Dashboard | `/dashboard` | Shell |
-| Council UI | `/council` | UI loads; live deliberation needs key |
-| Content Pipeline board | `/content` | Status contract + n8n alignment |
-| Health | `/api/health` | Status JSON |
-| Agents catalog | `/api/agents` | 12 agents |
-| Pipeline contract | `/api/content/pipeline` | Status machine JSON |
+## Deploy
 
-## 4. What needs `ANTHROPIC_API_KEY`
-
-- `POST /api/council/deliberate`
-- `POST /api/orchestrate`
-- Optional AI roadmap on career audit
-
-Without the key, those routes degrade gracefully (app still boots).
-
-## 5. Content pipeline (production)
-
-Live automation is **n8n**, not this repo:
-
-- Drive: `TQO-Content-Pipeline.json`
-- Drive: `TQO - Platform Packaging Pipeline.json`
-- Airtable statuses: Idea → Scripted → Queued → Rendering → Ready → Published
-- Human checkpoint before Published (never automatic)
-
-In-app module `src/lib/content/pipeline.ts` mirrors that contract so the product and automation stay aligned.
-
-## 6. Deploy (optional)
-
-```bash
-# Connect the GitHub repo to Vercel, or:
-npx vercel --prod
-```
-
-Set `NEXT_PUBLIC_AUDIT_URL` if you want a different Job Security Audit CTA URL in scripts.
+Vercel (or any Next host). Set `ANTHROPIC_API_KEY` in the environment.
+Content production remains on n8n + Airtable + the self-hosted render/TTS boxes;
+the Next app is the intelligence OS and the contract mirror, not the renderer.
