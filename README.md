@@ -23,6 +23,8 @@ Around that core:
   scoring engine (Job Security Audit) with model-generated roadmaps on top.
 - **Knowledge Engine** — RAG core with source grading, pluggable vector
   store (pgvector schema included), and grounded, cited answers.
+- **Content operations** — dual-brand pipeline (The Quiet Operator + NCO Forge)
+  mirrored from the live n8n workflow **TQO FINAL V5** (209 nodes, active).
 - **SaaS foundation** — full Postgres/Supabase schema (orgs, profiles,
   subscriptions, audit log, RLS), Stripe-ready tiers, n8n automation hooks.
 
@@ -44,6 +46,24 @@ orchestration) activate when `ANTHROPIC_API_KEY` is set.
 npm run typecheck && npm run test && npm run build
 ```
 
+## Content pipeline (TQO FINAL V5)
+
+Production content runs in n8n. This repo holds the contract mirror so the app
+and the automation stay aligned.
+
+| | |
+|---|---|
+| Workflow | **TQO FINAL V5** (`gsGJQan7a6ZufhYt`) |
+| Nodes | **209** (198 functional + 11 sticky) |
+| Active | true |
+| Brands | The Quiet Operator · NCO Forge |
+| Status path | Idea → Scripted → Queued → Rendering → Ready → Published |
+| Human Review | Required before publish (never auto-ticked) |
+
+- Contracts: `src/lib/content/pipeline.ts`
+- Architecture map: `docs/n8n/TQO_FINAL_V5.md`
+- Test notes: `HOW_TO_TEST.md`
+
 ## Key endpoints
 
 | Route | Purpose |
@@ -51,10 +71,12 @@ npm run typecheck && npm run test && npm run build
 | `POST /api/council/deliberate` | Full two-phase Council deliberation |
 | `POST /api/orchestrate` | Route → agent → optional Council review |
 | `POST /api/career/audit` | Deterministic audit (+ optional roadmap) |
+| `GET /api/content/pipeline` | Pipeline status machine + brand contracts |
 | `GET /api/agents` · `GET /api/health` | Catalog and status |
 
 ## Documentation
 
+- `docs/n8n/TQO_FINAL_V5.md` — live pipeline map (this sync)
 - `Package/docs/26_META_SUPREME_X_COUNCIL_ARCHITECTURE.md`
 - `Package/docs/27_COUNCIL_DECISION_ENGINE.md`
 - `Package/docs/28_AI_SAFETY_AND_ALIGNMENT_FRAMEWORK.md`
