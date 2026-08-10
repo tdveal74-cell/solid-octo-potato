@@ -3,9 +3,8 @@ import { AGENTS, AGENT_IDS } from "@/lib/agents/registry";
 import { COUNCILS } from "@/lib/council/councils";
 import { COUNCIL_IDS } from "@/lib/council/types";
 import { aiConfigured, MODELS } from "@/lib/ai/client";
+import { N8N_WORKFLOW, BRANDS } from "@/lib/content/pipeline";
 
-// aiConfigured() reads process.env at request time — force dynamic rendering so
-// the status reflects the running server, not the build machine.
 export const dynamic = "force-dynamic";
 
 export default function Dashboard() {
@@ -30,13 +29,14 @@ export default function Dashboard() {
         </span>
       </div>
 
-      <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-4">
         <StatCard label="Councils seated" value={String(COUNCIL_IDS.length)} />
         <StatCard label="Agents deployed" value={String(AGENT_IDS.length)} />
         <StatCard label="Primary model" value={MODELS.PRIMARY} mono />
+        <StatCard label="Pipeline nodes" value={String(N8N_WORKFLOW.nodes)} />
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Link
           href="/council"
           className="rounded-sm border border-ink-border bg-ink-raised p-6 hover:border-brass"
@@ -61,6 +61,19 @@ export default function Dashboard() {
           </p>
           <p className="mt-4 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-brass">
             POST /api/career/audit
+          </p>
+        </Link>
+        <Link
+          href="/content"
+          className="rounded-sm border border-ink-border bg-ink-raised p-6 hover:border-brass"
+        >
+          <h2 className="text-lg font-semibold text-fog">Content Pipeline</h2>
+          <p className="mt-2 text-sm text-fog-dim">
+            {N8N_WORKFLOW.name}: {Object.keys(BRANDS).length} brands,{" "}
+            {N8N_WORKFLOW.nodes} nodes, Human Review gate before publish.
+          </p>
+          <p className="mt-4 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-brass">
+            GET /api/content/pipeline
           </p>
         </Link>
       </div>
