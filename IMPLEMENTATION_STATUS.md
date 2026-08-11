@@ -1,20 +1,16 @@
-# Quiet Operator (solid-octo-potato) — Status
+# Quiet Operator — Status
 
-**Updated:** 2026-08-10 (flagship)
+**Updated:** 2026-08-10 (v0 complete)
 
-## Live
+## COMPLETE · LIVE
 
-- [x] Deployed: https://quiet-operator.vercel.app
-- [x] Health + AI config detection
-- [x] META SUPREME X Council path
-- [x] Job Security Audit (deterministic)
-- [x] TQO FINAL V5 content pipeline mirror (209 nodes, dual-brand)
-- [x] Content board UI
-- [x] `FLAGSHIP.md`
+- [x] https://quiet-operator.vercel.app
+- [x] Council · agents · career audit
+- [x] TQO FINAL V5 (209 nodes)
+- [x] Content board
+- [x] AI configured in production
+- [x] FLAGSHIP.md · COMPLETION.md
 
 ## Optional next
 
-- [ ] Custom domain
-- [ ] Stripe
-- [ ] Live Airtable/Supabase feed into content board
-- [ ] Auth
+- Custom domain · Stripe · Auth · live content feed
