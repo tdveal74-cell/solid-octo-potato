@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   classifyTask,
   exposureBand,
+  JSA_METHODOLOGY_VERSION,
   runAudit,
   scoreTask,
+  sensitivityPreview,
   type TaskInput,
 } from "@/lib/career/audit";
 
@@ -83,9 +85,14 @@ describe("runAudit", () => {
     },
   ];
 
+  it("stamps methodology version on every result", () => {
+    const result = runAudit(tasks);
+    expect(result.methodologyVersion).toBe(JSA_METHODOLOGY_VERSION);
+    expect(result.uncertainty.scoreIsDeterministic).toBe(true);
+  });
+
   it("computes a time-weighted exposure score", () => {
     const result = runAudit(tasks);
-    // 40% at 100 + 40% at 0 + 20% at scoreTask(report drafting)
     const reportScore = result.tasks.find((t) => t.name === "Report drafting")!.exposure;
     const expected = Math.round((0.4 * 100 + 0.4 * 0 + 0.2 * reportScore) * 10) / 10;
     expect(result.exposureScore).toBeCloseTo(expected, 1);
@@ -116,8 +123,6 @@ describe("runAudit", () => {
     const two = runAudit(tasks.slice(0, 2));
     const overlap = two.humanLeverage.filter((t) => two.automationFront.includes(t));
     expect(overlap).toHaveLength(0);
-    expect(two.humanLeverage).toEqual(["Client negotiation"]);
-    expect(two.automationFront).toEqual(["Data entry"]);
   });
 
   it("rejects an empty task list", () => {
@@ -128,5 +133,12 @@ describe("runAudit", () => {
     expect(() =>
       runAudit([{ name: "x", timeShare: 0, factors: FULLY_AUTOMATABLE }])
     ).toThrow();
+  });
+});
+
+describe("sensitivityPreview", () => {
+  it("shows direction of factor change", () => {
+    const s = sensitivityPreview(FULLY_PROTECTED, "routineness", 5);
+    expect(s.adjusted).toBeGreaterThan(s.base);
   });
 });

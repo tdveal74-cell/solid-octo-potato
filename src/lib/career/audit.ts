@@ -1,12 +1,30 @@
 /**
  * Job Security Audit — deterministic AI-exposure scoring engine.
  *
- * The audit reasons task-by-task, not title-by-title. A role is a weighted
- * portfolio of tasks; each task is rated on five automatability factors, and
- * the role's exposure is the time-weighted aggregate. The LLM layer (Job
- * Security Audit Agent) adds the qualitative narrative on top of these
- * numbers — the numbers themselves are pure and reproducible.
+ * Methodology version is part of the public contract. Scores are only
+ * comparable within the same methodologyVersion. Narrative/roadmap layers
+ * must never mutate these numbers.
  */
+
+/** Bump when factor weights, banding, or classification thresholds change. */
+export const JSA_METHODOLOGY_VERSION = "1.0.0" as const;
+
+export const JSA_METHODOLOGY = {
+  version: JSA_METHODOLOGY_VERSION,
+  description:
+    "Task-level time-weighted exposure from five factors. Deterministic; no model in the score path.",
+  factors: [
+    { id: "routineness", direction: "increases-exposure", weight: 0.35 },
+    { id: "digitalness", direction: "increases-exposure", weight: 0.25 },
+    { id: "creativity", direction: "decreases-exposure", weight: -0.15 },
+    { id: "interpersonal", direction: "decreases-exposure", weight: -0.15 },
+    { id: "physical", direction: "decreases-exposure", weight: -0.1 },
+  ],
+  classificationThresholds: { automate: 70, augment: 40 },
+  bandThresholds: { high: 70, elevated: 55, moderate: 35 },
+  uncertaintyNote:
+    "Scores are model-free estimates from operator-provided factor ratings. They are decision aids, not predictions. Sensitivity: changing any single factor by ±2 typically moves task exposure by a few points; role score moves with time weight.",
+} as const;
 
 export interface TaskInput {
   name: string;
@@ -17,41 +35,34 @@ export interface TaskInput {
 }
 
 export interface TaskFactors {
-  /** How rule-based / repeatable the task is (10 = fully proceduralized). */
   routineness: number;
-  /** How much the task is pure information manipulation (10 = entirely digital I/O). */
   digitalness: number;
-  /** Genuine creative/novel judgment required (10 = constant novel judgment). REDUCES exposure. */
   creativity: number;
-  /** Trust, empathy, persuasion, accountability to humans (10 = relationship-critical). REDUCES exposure. */
   interpersonal: number;
-  /** Physical presence / dexterity required (10 = fully physical). REDUCES exposure. */
   physical: number;
 }
 
 export interface TaskScore {
   name: string;
   timeShare: number;
-  /** 0–100 exposure for this task. */
   exposure: number;
   classification: "automate" | "augment" | "human-leverage";
 }
 
 export interface AuditResult {
-  /** 0–100 overall AI exposure (higher = more exposed). */
+  methodologyVersion: typeof JSA_METHODOLOGY_VERSION;
   exposureScore: number;
-  /** 0–100 security score (inverse convenience view). */
   securityScore: number;
   band: "low" | "moderate" | "elevated" | "high";
   tasks: TaskScore[];
-  /**
-   * Tasks to deliberately concentrate time on (lowest exposure, highest
-   * leverage). Automate-band tasks never appear here; empty when every task
-   * in the role is in the automate band.
-   */
   humanLeverage: string[];
-  /** Tasks likely to be automated first (highest exposure). */
   automationFront: string[];
+  /** Qualitative uncertainty for UI — not a calibrated probability. */
+  uncertainty: {
+    note: string;
+    scoreIsDeterministic: true;
+    inputsAreSubjective: true;
+  };
 }
 
 const FACTOR_WEIGHTS = {
@@ -62,10 +73,7 @@ const FACTOR_WEIGHTS = {
   physical: -0.1,
 } as const;
 
-/** Score a single task's AI exposure, 0–100. */
 export function scoreTask(factors: TaskFactors): number {
-  // Weighted sum over factors normalized to 0–1; negative weights are
-  // protective. Raw range is [-0.4, 0.6]; map linearly to [0, 100].
   const f = normalizeFactors(factors);
   const raw =
     f.routineness * FACTOR_WEIGHTS.routineness +
@@ -73,22 +81,33 @@ export function scoreTask(factors: TaskFactors): number {
     f.creativity * FACTOR_WEIGHTS.creativity +
     f.interpersonal * FACTOR_WEIGHTS.interpersonal +
     f.physical * FACTOR_WEIGHTS.physical;
-  const min = FACTOR_WEIGHTS.creativity + FACTOR_WEIGHTS.interpersonal + FACTOR_WEIGHTS.physical; // -0.4
-  const max = FACTOR_WEIGHTS.routineness + FACTOR_WEIGHTS.digitalness; // 0.6
+  const min = FACTOR_WEIGHTS.creativity + FACTOR_WEIGHTS.interpersonal + FACTOR_WEIGHTS.physical;
+  const max = FACTOR_WEIGHTS.routineness + FACTOR_WEIGHTS.digitalness;
   return round1(((raw - min) / (max - min)) * 100);
 }
 
 export function classifyTask(exposure: number): TaskScore["classification"] {
-  if (exposure >= 70) return "automate";
-  if (exposure >= 40) return "augment";
+  if (exposure >= JSA_METHODOLOGY.classificationThresholds.automate) return "automate";
+  if (exposure >= JSA_METHODOLOGY.classificationThresholds.augment) return "augment";
   return "human-leverage";
 }
 
 export function exposureBand(score: number): AuditResult["band"] {
-  if (score >= 70) return "high";
-  if (score >= 55) return "elevated";
-  if (score >= 35) return "moderate";
+  if (score >= JSA_METHODOLOGY.bandThresholds.high) return "high";
+  if (score >= JSA_METHODOLOGY.bandThresholds.elevated) return "elevated";
+  if (score >= JSA_METHODOLOGY.bandThresholds.moderate) return "moderate";
   return "low";
+}
+
+/** One-factor sensitivity helper for explainability UI. */
+export function sensitivityPreview(
+  factors: TaskFactors,
+  factor: keyof TaskFactors,
+  delta: number
+): { base: number; adjusted: number; delta: number } {
+  const base = scoreTask(factors);
+  const adjusted = scoreTask({ ...factors, [factor]: factors[factor] + delta });
+  return { base, adjusted, delta: round1(adjusted - base) };
 }
 
 export function runAudit(tasks: TaskInput[]): AuditResult {
@@ -121,11 +140,6 @@ export function runAudit(tasks: TaskInput[]): AuditResult {
     scored.reduce((s, t) => s + t.exposure * (t.timeShare / 100), 0)
   );
 
-  // Headline lists. Only tasks outside the automate band qualify as
-  // "double down here" advice — recommending a fully-automatable task as
-  // leverage would be the opposite of the audit's guidance. When every task
-  // is in the automate band, humanLeverage is empty (the UI surfaces that as
-  // its own finding). The two lists never share a task.
   const bySafety = [...scored].sort((a, b) => a.exposure - b.exposure);
   const leverageEligible = bySafety.filter((t) => t.classification !== "automate");
   const leverageCount = Math.min(3, Math.ceil(bySafety.length / 2), leverageEligible.length);
@@ -135,13 +149,20 @@ export function runAudit(tasks: TaskInput[]): AuditResult {
     .slice(Math.max(0, frontPool.length - 3))
     .reverse()
     .map((t) => t.name);
+
   return {
+    methodologyVersion: JSA_METHODOLOGY_VERSION,
     exposureScore,
     securityScore: round1(100 - exposureScore),
     band: exposureBand(exposureScore),
     tasks: scored,
     humanLeverage,
     automationFront,
+    uncertainty: {
+      note: JSA_METHODOLOGY.uncertaintyNote,
+      scoreIsDeterministic: true,
+      inputsAreSubjective: true,
+    },
   };
 }
 
