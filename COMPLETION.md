@@ -1,22 +1,21 @@
-# The Quiet Operator — v0 Complete
+# The Quiet Operator — Complete
 
 **Live:** https://quiet-operator.vercel.app
 
 ## Shipped
 
-- META SUPREME X Council path
-- 12-agent network surface
-- Job Security Audit (deterministic + optional AI)
-- TQO FINAL V5 content pipeline mirror (209 nodes, dual-brand)
-- Content board UI
-- Health endpoint with AI config detection
-- Production deploy on Vercel with Anthropic configured
+- Council · agents · career audit · content V5 board
+- Production AI (`aiConfigured: true`)
+- Pricing page + Stripe Checkout API (activates when Stripe env vars are set)
+- DB schema ready for Supabase (`src/lib/db/schema.sql`)
 
-## Optional product increments (not blockers)
+## Your keys to flip live billing
 
-- Custom domain
-- Stripe checkout
-- Auth / multi-operator
-- Live Airtable rows in the content board
+```
+STRIPE_SECRET_KEY=
+STRIPE_PRICE_OPERATOR=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+```
 
-v0 intelligence OS + content contract is complete and live.
+Then open `/pricing` → Operator → Checkout.
