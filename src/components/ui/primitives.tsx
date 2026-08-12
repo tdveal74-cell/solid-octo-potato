@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
 /**
@@ -16,8 +18,18 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "reac
  * used it for nothing.
  */
 
-function cx(...parts: (string | false | undefined | null)[]): string {
-  return parts.filter(Boolean).join(" ");
+/**
+ * Merge class names so a caller override actually overrides.
+ *
+ * A plain join emitted BOTH utilities — `<Grid className="gap-3">` shipped the
+ * base `gap-4` alongside it, and which one applied came down to their order in
+ * the generated stylesheet rather than the order of the call. That is a silent
+ * wrong-value bug: the markup reads as though the override took, and sometimes
+ * it did. twMerge resolves the conflict by letting the last value win, which is
+ * what every caller already assumed was happening.
+ */
+function cx(...parts: ClassValue[]): string {
+  return twMerge(clsx(parts));
 }
 
 /** Small brass label above a heading. Sets the register before the words land. */
@@ -46,7 +58,9 @@ export function Heading({
   size?: "sm" | "md" | "lg" | "hero";
   className?: string;
 }) {
-  const Tag = (["h1", "h2", "h3"] as const)[level - 1];
+  // Explicit, not positional: an index into an array silently returns
+  // undefined if the union ever widens, and React renders nothing.
+  const Tag = ({ 1: "h1", 2: "h2", 3: "h3" } as const)[level];
   return (
     <Tag
       className={cx(
@@ -86,7 +100,11 @@ export function Section({
   lede?: string;
   eyebrow?: string;
   aside?: ReactNode;
-  /** Drop the top rule and reduce padding — for the first band on a page. */
+  /**
+   * Drop the top rule and reduce padding — for the first band on a page.
+   * A caller that passes `first` and then adds a border back in `className` is
+   * asking for two different things; pass neither or one.
+   */
   first?: boolean;
   children?: ReactNode;
   className?: string;
