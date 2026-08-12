@@ -178,8 +178,29 @@ create table if not exists audit_log (
 -- ── Row-level security (Supabase) ───────────────────────────────────────
 
 -- RLS is enabled on every table exposed through the Supabase Data API. Tables
--- with no policy below (organizations, audit_log) are deny-by-default for
--- client roles: reachable only via the service role, never the anon/auth key.
+-- with no policy below are deny-by-default for client roles: reachable only via
+-- the service role, never the anon/auth key.
+--
+-- That set is: subscriptions, deliberations, audit_log.
+--
+-- This comment used to name organizations and audit_log, and was wrong in both
+-- directions — organizations does have a policy ('member org'), and the two
+-- that actually lack one went unmentioned. Stating it accurately matters,
+-- because the obvious reading of the old version was that subscriptions and
+-- deliberations had simply been forgotten, and the obvious repair would be to
+-- give them a policy matching the ones below.
+--
+-- On subscriptions that repair would open a real hole. Every policy in this
+-- file is `for all`, which covers insert and update as well as select — so a
+-- `for all` policy on subscriptions lets a user write their own `tier` and hand
+-- themselves the enterprise plan. Billing state is written by the Stripe
+-- webhook and by nothing else. If a client-side read is ever needed here, it
+-- must be `for select` alone.
+--
+-- Nothing reads these three from a browser today: the app is server-rendered,
+-- the client in src/lib/db/client.ts is service-role and server-only, and there
+-- is no client-side Supabase anywhere in src/. They stay closed until something
+-- actually needs them open.
 alter table organizations       enable row level security;
 alter table profiles            enable row level security;
 alter table subscriptions       enable row level security;
