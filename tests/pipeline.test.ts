@@ -5,7 +5,9 @@ import {
   formatPackagingBlock,
   PIPELINE_STATUSES,
   buildScriptSystemPrompt,
+  buildPackagingSystemPrompt,
   DEFAULT_AUDIT_LANDING_URL,
+  type BrandId,
 } from "../src/lib/content/pipeline";
 
 describe("content pipeline status machine", () => {
@@ -36,10 +38,23 @@ describe("content pipeline status machine", () => {
 
 describe("script + packaging helpers", () => {
   it("embeds the audit landing URL in the script system prompt", () => {
-    const prompt = buildScriptSystemPrompt("https://example.com/audit");
+    // Brand first, then landing URL — the URL was previously passed as the
+    // brand, which read as an unknown brand and threw inside the template.
+    const prompt = buildScriptSystemPrompt("tqo", "https://example.com/audit");
     expect(prompt).toContain("https://example.com/audit");
     expect(prompt).toContain("The Quiet Operator");
     expect(prompt).toContain("anti-hype");
+  });
+
+  it("names the offending brand instead of failing deep inside a template", () => {
+    expect(() => buildScriptSystemPrompt("nope" as BrandId)).toThrow(/Unknown brand "nope"/);
+    expect(() => buildPackagingSystemPrompt("nope" as BrandId)).toThrow(/Unknown brand "nope"/);
+  });
+
+  it("builds the NCO brand prompt from its own context", () => {
+    const prompt = buildScriptSystemPrompt("nco");
+    expect(prompt).toContain("NCO Forge");
+    expect(prompt).toContain("Leaders aren't born");
   });
 
   it("uses the default audit URL when none is provided", () => {

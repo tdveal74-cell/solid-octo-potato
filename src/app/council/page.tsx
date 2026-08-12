@@ -2,6 +2,17 @@
 
 import { useState } from "react";
 import type { DeliberationResult } from "@/lib/council/types";
+import {
+  Badge,
+  Button,
+  Card,
+  CardTitle,
+  Grid,
+  Heading,
+  Lede,
+  Page,
+  Stat,
+} from "@/components/ui/primitives";
 
 const STANCE_COLOR: Record<string, string> = {
   endorse: "text-signal-green",
@@ -41,14 +52,14 @@ export default function CouncilPage() {
   const verdicts = result ? (result.phase2 ?? result.phase1) : [];
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
-      <h1 className="font-[family-name:var(--font-display)] text-4xl text-fog">
+    <Page className="max-w-4xl py-16">
+      <Heading level={1} size="lg">
         Convene the Council
-      </h1>
-      <p className="mt-3 text-fog-dim">
-        Put a decision before all eight councils. They analyze independently,
-        debate, and return a scored recommendation with dissent preserved.
-      </p>
+      </Heading>
+      <Lede className="mt-3">
+        Put a decision before all eight councils. They analyze independently, debate, and return a
+        scored recommendation with dissent preserved.
+      </Lede>
 
       <form onSubmit={submit} className="mt-10 space-y-4">
         <label htmlFor="council-question" className="block text-sm text-fog">
@@ -68,17 +79,13 @@ export default function CouncilPage() {
               type="checkbox"
               checked={debate}
               onChange={(e) => setDebate(e.target.checked)}
-              className="accent-[#c9a96a]"
+              className="accent-brass"
             />
             Include debate round (phase 2)
           </label>
-          <button
-            type="submit"
-            disabled={loading || question.trim().length < 8}
-            className="rounded-sm bg-brass px-6 py-2.5 text-sm font-medium text-ink disabled:opacity-40"
-          >
+          <Button type="submit" disabled={loading || question.trim().length < 8} className="py-2.5">
             {loading ? "Deliberating…" : "Deliberate"}
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -128,33 +135,37 @@ export default function CouncilPage() {
             )}
           </div>
 
-          {/* Metrics */}
-          <div className="grid grid-cols-3 gap-4">
-            <Metric
+          {/* The figures carry their own verdict: risk and contradictions are
+              only coloured when there is something to report. A number that is
+              always brass tells the reader nothing about this deliberation. */}
+          <Grid cols={3}>
+            <Stat
               label="Support"
-              value={`${result.consensus.score}`}
-              sub={`${result.consensus.band} agreement (${result.consensus.agreement})`}
+              value={result.consensus.score}
+              tone={result.consensus.score >= 70 ? "good" : result.consensus.score >= 40 ? "warn" : "bad"}
             />
-            <Metric
+            <Stat
               label="Aggregate risk"
-              value={`${result.consensus.aggregateRisk.score}`}
-              sub={result.consensus.aggregateRisk.highestSeverity ?? "none"}
+              value={result.consensus.aggregateRisk.score}
+              tone={riskTone(result.consensus.aggregateRisk.highestSeverity)}
             />
-            <Metric
+            <Stat
               label="Contradictions"
-              value={`${result.consensus.contradictions.length}`}
-              sub={`${(result.elapsedMs / 1000).toFixed(0)}s deliberation`}
+              value={result.consensus.contradictions.length}
+              tone={result.consensus.contradictions.length > 0 ? "warn" : "neutral"}
             />
-          </div>
+          </Grid>
+          <p className="-mt-4 text-xs text-fog-dim">
+            {result.consensus.band} agreement ({result.consensus.agreement}) ·{" "}
+            {result.consensus.aggregateRisk.highestSeverity ?? "no"} severity ·{" "}
+            {(result.elapsedMs / 1000).toFixed(0)}s deliberation
+          </p>
 
-          {/* Verdicts */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Grid cols={2}>
             {verdicts.map((v) => (
-              <div key={v.councilId} className="rounded-sm border border-ink-border p-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold capitalize text-fog">
-                    {v.councilId} council
-                  </h3>
+              <Card key={v.councilId}>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="capitalize">{v.councilId} council</CardTitle>
                   <span
                     className={`font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest ${STANCE_COLOR[v.stance]}`}
                   >
@@ -163,31 +174,28 @@ export default function CouncilPage() {
                 </div>
                 <p className="mt-2 text-xs leading-relaxed text-fog-dim">{v.position}</p>
                 {v.risks.length > 0 && (
-                  <ul className="mt-3 space-y-1 text-[11px] text-signal-amber">
+                  <ul className="mt-3 space-y-1.5 text-[11px] text-signal-amber">
                     {v.risks.map((r, i) => (
-                      <li key={i}>
-                        [{r.severity}] {r.description}
+                      <li key={i} className="flex gap-2">
+                        <Badge tone={riskTone(r.severity)}>{r.severity}</Badge>
+                        <span className="text-fog-dim">{r.description}</span>
                       </li>
                     ))}
                   </ul>
                 )}
-              </div>
+              </Card>
             ))}
-          </div>
+          </Grid>
         </div>
       )}
-    </div>
+    </Page>
   );
 }
 
-function Metric({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return (
-    <div className="rounded-sm border border-ink-border bg-ink-raised p-5 text-center">
-      <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-fog-dim">
-        {label}
-      </p>
-      <p className="mt-2 font-[family-name:var(--font-display)] text-3xl text-brass">{value}</p>
-      <p className="mt-1 text-xs capitalize text-fog-dim">{sub}</p>
-    </div>
-  );
+/** Severity → tone, so a risk reads at a glance without reading the word. */
+function riskTone(severity?: string | null): "neutral" | "warn" | "bad" {
+  const s = (severity ?? "").toLowerCase();
+  if (["critical", "high", "severe"].includes(s)) return "bad";
+  if (["medium", "moderate", "low"].includes(s)) return "warn";
+  return "neutral";
 }

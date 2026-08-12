@@ -3,6 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 import { PLANS } from "@/lib/billing/plans";
+import {
+  Button,
+  ButtonLink,
+  Card,
+  Grid,
+  Heading,
+  Lede,
+  Page,
+} from "@/components/ui/primitives";
+
+/** Price line for a plan — free, metered, or "talk to us". */
+function priceLabel(plan: (typeof PLANS)[number]): string {
+  if (plan.id === "enterprise") return "Custom";
+  if (plan.priceUsdMonthly === 0) return "$0";
+  return `$${plan.priceUsdMonthly}/mo`;
+}
 
 export default function PricingPage() {
   const [busy, setBusy] = useState<string | null>(null);
@@ -31,74 +47,79 @@ export default function PricingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#07090d] text-[#e8eaef] px-6 py-16">
-      <div className="mx-auto max-w-4xl">
-        <p className="text-sm text-[#9aa3b5]">
-          <Link href="/" className="hover:text-white">
+    <Page>
+      <section className="py-16">
+        <p className="text-sm text-fog-dim">
+          <Link href="/" className="hover:text-fog">
             Quiet Operator
           </Link>
           {" / "}
           Pricing
         </p>
-        <h1 className="mt-4 text-3xl font-medium tracking-tight">Plans</h1>
-        <p className="mt-2 text-[#9aa3b5]">
-          Loud tools make noise. Quiet operators make moves.
-        </p>
+        <Heading level={1} size="lg" className="mt-4">
+          Plans
+        </Heading>
+        <Lede className="mt-2">Loud tools make noise. Quiet operators make moves.</Lede>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className="rounded-2xl border border-white/10 bg-[#10151d] p-6 flex flex-col"
-            >
-              <h2 className="text-xl text-white">{plan.name}</h2>
-              <p className="mt-2 text-2xl text-[#c9a86a]">
-                {plan.priceUsdMonthly === 0 && plan.id !== "enterprise"
-                  ? "$0"
-                  : plan.id === "enterprise"
-                    ? "Custom"
-                    : `$${plan.priceUsdMonthly}/mo`}
-              </p>
-              <p className="mt-3 text-sm text-[#9aa3b5]">{plan.description}</p>
-              <ul className="mt-4 space-y-2 text-sm text-[#c8cdd8] flex-1">
-                {plan.features.map((f) => (
-                  <li key={f}>· {f}</li>
-                ))}
-              </ul>
-              {plan.id === "operator" ? (
-                <button
-                  type="button"
-                  disabled={busy === plan.id}
-                  onClick={() => checkout(plan.id)}
-                  className="mt-6 rounded-xl bg-[#c9a86a] px-4 py-2.5 text-sm font-medium text-[#07090d] disabled:opacity-60"
+        <Grid cols={3} className="mt-10">
+          {PLANS.map((plan) => {
+            // Brass marks the one plan we are actually asking for. The others
+            // are available, not sold.
+            const isPrimary = plan.id === "operator";
+            return (
+              <Card key={plan.id} raised className="flex flex-col p-6">
+                <h2 className="text-xl text-fog">{plan.name}</h2>
+                <p
+                  className={`mt-2 font-[family-name:var(--font-display)] text-2xl tabular-nums ${
+                    isPrimary ? "text-brass" : "text-fog"
+                  }`}
                 >
-                  {busy === plan.id ? "Starting…" : "Continue with Stripe"}
-                </button>
-              ) : plan.id === "free" ? (
-                <Link
-                  href="/dashboard"
-                  className="mt-6 rounded-xl border border-white/15 px-4 py-2.5 text-center text-sm"
-                >
-                  Open dashboard
-                </Link>
-              ) : (
-                <a
-                  href="mailto:hello@quietoperator.app"
-                  className="mt-6 rounded-xl border border-white/15 px-4 py-2.5 text-center text-sm"
-                >
-                  Contact
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
+                  {priceLabel(plan)}
+                </p>
+                <p className="mt-3 text-sm text-fog-dim">{plan.description}</p>
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-fog-dim">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex gap-2">
+                      <span aria-hidden className="text-brass-dim">
+                        ·
+                      </span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {isPrimary ? (
+                  <Button
+                    type="button"
+                    disabled={busy === plan.id}
+                    onClick={() => checkout(plan.id)}
+                    className="mt-6 px-4 py-2.5"
+                  >
+                    {busy === plan.id ? "Starting…" : "Continue with Stripe"}
+                  </Button>
+                ) : plan.id === "free" ? (
+                  <ButtonLink href="/dashboard" variant="secondary" className="mt-6 px-4 py-2.5">
+                    Open dashboard
+                  </ButtonLink>
+                ) : (
+                  <a
+                    href="mailto:hello@quietoperator.app"
+                    className="mt-6 rounded-sm border border-ink-border px-4 py-2.5 text-center text-sm text-fog transition-colors duration-200 hover:border-brass"
+                  >
+                    Contact
+                  </a>
+                )}
+              </Card>
+            );
+          })}
+        </Grid>
 
         {message && (
-          <p className="mt-8 rounded-xl border border-white/10 bg-[#141822] p-4 text-sm text-[#c8cdd8]">
+          <p className="mt-8 rounded-sm border border-ink-border bg-ink-raised p-4 text-sm text-fog-dim">
             {message}
           </p>
         )}
-      </div>
-    </main>
+      </section>
+    </Page>
   );
 }
