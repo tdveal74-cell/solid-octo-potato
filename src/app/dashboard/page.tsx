@@ -86,7 +86,7 @@ export default function Dashboard() {
         </Grid>
       </section>
 
-      <Section title="Council roster" first className="border-t border-ink-border pt-12">
+      <Section title="Council roster">
         <Grid cols={4} className="gap-3">
           {COUNCIL_IDS.map((id) => (
             <Card key={id} className="px-4 py-3">
