@@ -4,126 +4,111 @@ import { COUNCILS } from "@/lib/council/councils";
 import { COUNCIL_IDS } from "@/lib/council/types";
 import { aiConfigured, MODELS } from "@/lib/ai/client";
 import { N8N_WORKFLOW, BRANDS } from "@/lib/content/pipeline";
+import {
+  Badge,
+  Card,
+  CardTitle,
+  Grid,
+  Heading,
+  Lede,
+  Meta,
+  Page,
+  Section,
+  Stat,
+} from "@/components/ui/primitives";
 
 export const dynamic = "force-dynamic";
 
+const ENTRY_POINTS = [
+  {
+    href: "/council",
+    title: "Convene the Council",
+    body: "Eight councils, two phases, one recommendation. For decisions that deserve more than a single model’s first take.",
+    endpoint: "POST /api/council/deliberate",
+  },
+  {
+    href: "/audit",
+    title: "Job Security Audit",
+    body: "Deterministic task-level AI-exposure scoring, with an optional Council-grade roadmap on top.",
+    endpoint: "POST /api/career/audit",
+  },
+  {
+    href: "/content",
+    title: "Content Pipeline",
+    body: `${N8N_WORKFLOW.name}: ${Object.keys(BRANDS).length} brands, ${N8N_WORKFLOW.nodes} nodes, Human Review gate before publish.`,
+    endpoint: "GET /api/content/pipeline",
+  },
+];
+
 export default function Dashboard() {
   const configured = aiConfigured();
+
   return (
-    <div className="mx-auto max-w-6xl px-6 py-16">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="font-[family-name:var(--font-display)] text-4xl text-fog">
-            Operations
-          </h1>
-          <p className="mt-2 text-fog-dim">META SUPREME X system status and entry points.</p>
+    <Page>
+      <section className="py-16">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <Heading level={1} size="lg">
+              Operations
+            </Heading>
+            <Lede className="mt-2">META SUPREME X system status and entry points.</Lede>
+          </div>
+          {/* The one live signal on the page, so it gets the colour. */}
+          <Badge tone={configured ? "good" : "warn"} className="px-3 py-1.5 text-[10px]">
+            {configured ? "intelligence online" : "api key required"}
+          </Badge>
         </div>
-        <span
-          className={`rounded-sm border px-3 py-1.5 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest ${
-            configured
-              ? "border-signal-green text-signal-green"
-              : "border-signal-amber text-signal-amber"
-          }`}
-        >
-          {configured ? "intelligence online" : "api key required"}
-        </span>
-      </div>
 
-      <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <StatCard label="Councils seated" value={String(COUNCIL_IDS.length)} />
-        <StatCard label="Agents deployed" value={String(AGENT_IDS.length)} />
-        <StatCard label="Primary model" value={MODELS.PRIMARY} mono />
-        <StatCard label="Pipeline nodes" value={String(N8N_WORKFLOW.nodes)} />
-      </div>
+        {/* Figures read in fog: they are facts, not alerts. Colour here would
+            compete with the status badge above, which is the actual signal. */}
+        <Grid cols={4} className="mt-10">
+          <Stat label="Councils seated" value={COUNCIL_IDS.length} />
+          <Stat label="Agents deployed" value={AGENT_IDS.length} />
+          <Stat label="Pipeline nodes" value={N8N_WORKFLOW.nodes} />
+          <Stat
+            label="Primary model"
+            value={
+              <span className="font-[family-name:var(--font-mono)] text-base">{MODELS.PRIMARY}</span>
+            }
+          />
+        </Grid>
 
-      <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Link
-          href="/council"
-          className="rounded-sm border border-ink-border bg-ink-raised p-6 hover:border-brass"
-        >
-          <h2 className="text-lg font-semibold text-fog">Convene the Council</h2>
-          <p className="mt-2 text-sm text-fog-dim">
-            Eight councils, two phases, one recommendation. For decisions that
-            deserve more than a single model&rsquo;s first take.
-          </p>
-          <p className="mt-4 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-brass">
-            POST /api/council/deliberate
-          </p>
-        </Link>
-        <Link
-          href="/audit"
-          className="rounded-sm border border-ink-border bg-ink-raised p-6 hover:border-brass"
-        >
-          <h2 className="text-lg font-semibold text-fog">Job Security Audit</h2>
-          <p className="mt-2 text-sm text-fog-dim">
-            Deterministic task-level AI-exposure scoring, with an optional
-            Council-grade roadmap on top.
-          </p>
-          <p className="mt-4 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-brass">
-            POST /api/career/audit
-          </p>
-        </Link>
-        <Link
-          href="/content"
-          className="rounded-sm border border-ink-border bg-ink-raised p-6 hover:border-brass"
-        >
-          <h2 className="text-lg font-semibold text-fog">Content Pipeline</h2>
-          <p className="mt-2 text-sm text-fog-dim">
-            {N8N_WORKFLOW.name}: {Object.keys(BRANDS).length} brands,{" "}
-            {N8N_WORKFLOW.nodes} nodes, Human Review gate before publish.
-          </p>
-          <p className="mt-4 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-brass">
-            GET /api/content/pipeline
-          </p>
-        </Link>
-      </div>
+        <Grid cols={3} className="mt-12 gap-6">
+          {ENTRY_POINTS.map((e) => (
+            <Link key={e.href} href={e.href} className="block">
+              <Card raised interactive className="h-full p-6">
+                <CardTitle className="text-lg">{e.title}</CardTitle>
+                <p className="mt-2 text-sm leading-relaxed text-fog-dim">{e.body}</p>
+                <Meta className="mt-4">{e.endpoint}</Meta>
+              </Card>
+            </Link>
+          ))}
+        </Grid>
+      </section>
 
-      <section className="mt-14">
-        <h2 className="text-xs uppercase tracking-widest text-fog-dim">Council roster</h2>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <Section title="Council roster" first className="border-t border-ink-border pt-12">
+        <Grid cols={4} className="gap-3">
           {COUNCIL_IDS.map((id) => (
-            <div key={id} className="rounded-sm border border-ink-border px-4 py-3">
+            <Card key={id} className="px-4 py-3">
               <p className="text-sm text-fog">{COUNCILS[id].name}</p>
               <p className="font-[family-name:var(--font-mono)] text-[10px] text-fog-dim">
                 w={COUNCILS[id].weight.toFixed(1)}
               </p>
-            </div>
+            </Card>
           ))}
-        </div>
-      </section>
+        </Grid>
+      </Section>
 
-      <section className="mt-10">
-        <h2 className="text-xs uppercase tracking-widest text-fog-dim">Agent network</h2>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <Section title="Agent network" className="pb-20">
+        <Grid cols={4} className="gap-3">
           {AGENT_IDS.map((id) => (
-            <div key={id} className="rounded-sm border border-ink-border px-4 py-3">
+            <Card key={id} className="flex items-start justify-between gap-2 px-4 py-3">
               <p className="text-sm text-fog">{AGENTS[id].name}</p>
-              {AGENTS[id].escalateToCouncil && (
-                <p className="font-[family-name:var(--font-mono)] text-[10px] text-brass">
-                  council-reviewed
-                </p>
-              )}
-            </div>
+              {AGENTS[id].escalateToCouncil && <Badge tone="accent">council</Badge>}
+            </Card>
           ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function StatCard({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="rounded-sm border border-ink-border bg-ink-raised p-5">
-      <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-fog-dim">
-        {label}
-      </p>
-      <p
-        className={`mt-2 text-2xl text-brass ${
-          mono ? "font-[family-name:var(--font-mono)] text-lg" : "font-[family-name:var(--font-display)]"
-        }`}
-      >
-        {value}
-      </p>
-    </div>
+        </Grid>
+      </Section>
+    </Page>
   );
 }

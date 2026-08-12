@@ -159,11 +159,26 @@ export const DEFAULT_AUDIT_LANDING_URL =
 
 // ── Script system prompts (mirror V5 Build Script Prompt) ───────────────
 
+/**
+ * Brand context for an id, failing with the id it was given.
+ *
+ * Without this an unknown brand reads as `undefined` and only surfaces several
+ * lines later as "cannot read properties of undefined (reading 'tagline')",
+ * naming neither the argument that was wrong nor the value it held.
+ */
+function brandContext(brand: BrandId): BrandContext {
+  const ctx = BRANDS[brand];
+  if (!ctx) {
+    throw new Error(`Unknown brand "${brand}" — expected one of: ${Object.keys(BRANDS).join(", ")}`);
+  }
+  return ctx;
+}
+
 export function buildScriptSystemPrompt(
   brand: BrandId = "tqo",
   landingUrl: string = DEFAULT_AUDIT_LANDING_URL
 ): string {
-  const ctx = BRANDS[brand];
+  const ctx = brandContext(brand);
 
   if (brand === "nco") {
     return `You are the script writer for NCO Forge — ${ctx.tagline} ${ctx.tagline2 ?? ""} The mission: bridging military and civilian life for today's warfighter. Real-world skills, fitness, mindset, finance and career strategy to dominate in uniform and win in life.
@@ -209,7 +224,7 @@ Return ONLY valid JSON: {"title":"...","script":"...","description":"...","broll
 }
 
 export function buildPackagingSystemPrompt(brand: BrandId = "tqo"): string {
-  const ctx = BRANDS[brand];
+  const ctx = brandContext(brand);
   if (brand === "nco") {
     return [
       `You write platform packaging for ${ctx.channel}. ${ctx.tagline}`,

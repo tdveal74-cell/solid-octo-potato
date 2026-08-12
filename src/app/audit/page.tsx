@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import type { AuditResult, TaskInput } from "@/lib/career/audit";
+import {
+  Button,
+  Card,
+  Heading,
+  Input,
+  Lede,
+  Page,
+} from "@/components/ui/primitives";
 
 interface TaskRow extends TaskInput {
   key: number;
@@ -74,53 +82,53 @@ export default function AuditPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
-      <h1 className="font-[family-name:var(--font-display)] text-4xl text-fog">
+    <Page className="max-w-4xl py-16">
+      <Heading level={1} size="lg">
         Job Security Audit
-      </h1>
-      <p className="mt-3 max-w-2xl text-fog-dim">
+      </Heading>
+      <Lede className="mt-3">
         Your job title doesn&rsquo;t get automated — your tasks do. Break your role into
         tasks, rate each one, and get a deterministic AI-exposure score with the
         tasks worth doubling down on.
-      </p>
+      </Lede>
 
       <form onSubmit={submit} className="mt-10 space-y-6">
         <div>
           <label htmlFor="audit-role" className="block text-sm text-fog">
             Your role
           </label>
-          <input
+          <Input
             id="audit-role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             placeholder="e.g. Senior Financial Analyst"
-            className="mt-2 w-full rounded-sm border border-ink-border bg-ink-raised p-3 text-sm text-fog placeholder:text-fog-dim focus:border-brass focus:outline-none"
+            className="mt-2"
           />
         </div>
 
         {tasks.map((task, i) => (
-          <div key={task.key} className="rounded-sm border border-ink-border p-5">
+          <Card key={task.key}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <label htmlFor={`task-name-${task.key}`} className="sr-only">
                 Task {i + 1} name
               </label>
-              <input
+              <Input
                 id={`task-name-${task.key}`}
                 value={task.name}
                 onChange={(e) => updateTask(task.key, { name: e.target.value })}
                 placeholder={`Task ${i + 1}, e.g. "Monthly variance reporting"`}
-                className="flex-1 rounded-sm border border-ink-border bg-ink-raised p-2.5 text-sm text-fog placeholder:text-fog-dim focus:border-brass focus:outline-none"
+                className="flex-1 p-2.5"
               />
               <label htmlFor={`task-time-${task.key}`} className="flex items-center gap-2 text-xs text-fog-dim">
                 % of time
-                <input
+                <Input
                   id={`task-time-${task.key}`}
                   type="number"
                   min={0}
                   max={100}
                   value={task.timeShare}
                   onChange={(e) => updateTask(task.key, { timeShare: Number(e.target.value) })}
-                  className="w-16 rounded-sm border border-ink-border bg-ink-raised p-2 text-sm text-fog"
+                  className="w-16 p-2"
                 />
               </label>
               {tasks.length > 1 && (
@@ -143,13 +151,13 @@ export default function AuditPage() {
                     max={10}
                     value={task.factors[key]}
                     onChange={(e) => updateFactor(task.key, key, Number(e.target.value))}
-                    className="mt-1 w-full accent-[#c9a96a]"
+                    className="mt-1 w-full accent-brass"
                   />
                   <span className="mt-1 block text-[10px]">{hint}</span>
                 </label>
               ))}
             </div>
-          </div>
+          </Card>
         ))}
 
         <div className="flex items-center justify-between">
@@ -160,13 +168,13 @@ export default function AuditPage() {
           >
             + Add task
           </button>
-          <button
+          <Button
             type="submit"
             disabled={loading || !role.trim() || tasks.some((t) => !t.name.trim())}
-            className="rounded-sm bg-brass px-6 py-2.5 text-sm font-medium text-ink disabled:opacity-40"
+            className="py-2.5"
           >
             {loading ? "Scoring…" : "Run audit"}
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -238,6 +246,6 @@ export default function AuditPage() {
           </div>
         </div>
       )}
-    </div>
+    </Page>
   );
 }
