@@ -51,8 +51,10 @@ export async function POST(request: Request) {
       headers: { "x-tqo-execution-mode": "live" },
     });
   } catch (err) {
-    console.error("[council/deliberate]", err);
     if (isProviderUnavailable(err)) {
+      console.warn(
+        "[council/deliberate] live provider unavailable; using degraded mode"
+      );
       return NextResponse.json(
         deliberateOffline(
           deliberationRequest,
@@ -61,6 +63,7 @@ export async function POST(request: Request) {
         { headers: { "x-tqo-execution-mode": "degraded" } }
       );
     }
+    console.error("[council/deliberate]", err);
     return NextResponse.json({ error: "Deliberation failed" }, { status: 500 });
   }
 }
