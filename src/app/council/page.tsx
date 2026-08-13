@@ -89,6 +89,24 @@ export default function CouncilPage() {
         </div>
       </form>
 
+      {result?.execution?.mode === "degraded" && (
+        <div
+          role="status"
+          className="mt-8 rounded-sm border border-signal-amber/50 bg-signal-amber/10 p-4"
+        >
+          <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-widest text-signal-amber">
+            Provider-degraded mode
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-fog">
+            {result.execution.notice}
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-fog-dim">
+            These are deterministic readiness checks, not a live AI verdict. Full Council
+            deliberation resumes automatically when the Anthropic account can serve requests.
+          </p>
+        </div>
+      )}
+
       {loading && (
         <p
           role="status"

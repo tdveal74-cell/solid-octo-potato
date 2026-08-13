@@ -77,6 +77,12 @@ export interface DeliberationResult {
   consensus: ConsensusReport;
   recommendation: FinalRecommendation;
   elapsedMs: number;
+  /** Present when the request could not use the live model provider. */
+  execution?: {
+    mode: "live" | "degraded";
+    provider: "anthropic" | "offline";
+    notice?: string;
+  };
 }
 
 export interface ConsensusReport {

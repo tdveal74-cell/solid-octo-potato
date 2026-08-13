@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { aiConfigured } from "@/lib/ai/client";
 import { deliberate } from "@/lib/council/engine";
+import {
+  DEGRADED_NOTICE,
+  deliberateOffline,
+  isProviderUnavailable,
+} from "@/lib/council/fallback";
 import { COUNCIL_IDS } from "@/lib/council/types";
 
 export const maxDuration = 300;
@@ -9,8 +14,6 @@ export const maxDuration = 300;
 const BodySchema = z.object({
   question: z.string().min(8, "question must be at least 8 characters").max(4000),
   context: z.string().max(24000).optional(),
-  // Duplicates are removed so a crafted request can't multiply council
-  // fan-out; post-dedupe length is bounded by the 8 distinct council ids.
   councils: z
     .array(z.enum(COUNCIL_IDS as [string, ...string[]]))
     .nonempty()
@@ -21,13 +24,6 @@ const BodySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (!aiConfigured()) {
-    return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY is not configured" },
-      { status: 503 }
-    );
-  }
-
   const parsed = BodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json(
@@ -36,16 +32,35 @@ export async function POST(request: Request) {
     );
   }
 
-  try {
-    const result = await deliberate({
-      question: parsed.data.question,
-      context: parsed.data.context,
-      councils: parsed.data.councils as never,
-      debate: parsed.data.debate,
+  const deliberationRequest = {
+    question: parsed.data.question,
+    context: parsed.data.context,
+    councils: parsed.data.councils as never,
+    debate: parsed.data.debate,
+  };
+
+  if (!aiConfigured()) {
+    return NextResponse.json(deliberateOffline(deliberationRequest), {
+      headers: { "x-tqo-execution-mode": "degraded" },
     });
-    return NextResponse.json(result);
+  }
+
+  try {
+    const result = await deliberate(deliberationRequest);
+    return NextResponse.json(result, {
+      headers: { "x-tqo-execution-mode": "live" },
+    });
   } catch (err) {
     console.error("[council/deliberate]", err);
+    if (isProviderUnavailable(err)) {
+      return NextResponse.json(
+        deliberateOffline(
+          deliberationRequest,
+          `${DEGRADED_NOTICE} The provider rejected or could not serve the live request.`
+        ),
+        { headers: { "x-tqo-execution-mode": "degraded" } }
+      );
+    }
     return NextResponse.json({ error: "Deliberation failed" }, { status: 500 });
   }
 }
