@@ -3,7 +3,31 @@
 **Status:** Flagship visual + product specification  
 **Design system:** Deep Navy · Amber Gold · Warm Off-White  
 **Standard:** Apple-level calm · evidence-first · never a chatbot  
-**Aligned with:** Meta Supreme Apex Genesis + EditForge
+**Aligned with:** Meta Supreme Apex Genesis + EditForge  
+**Viewport rule:** Chromebook-first · native resolution · fluid upward scale
+
+---
+
+## 0. Viewport & resolution (entry standard)
+
+**Primary experience is optimized for the current HP Chromebook viewport first**, then scales upward automatically.
+
+| Rule | Requirement |
+|------|-------------|
+| Entry device | HP Chromebook-class (compact laptop / convertible) |
+| Rendering | Device native resolution and pixel density |
+| Canvas | **No fixed canvas** — layout is fluid |
+| Scaling | Automatic upward to larger / higher-DPI displays |
+| Sharpness | **No blur** — respect `devicePixelRatio`; no forced 1× bitmap stretch |
+| Screen use | **No wasted screen** — content and chrome use the available viewport efficiently |
+| Quality bar | **AAA is the entry standard** — not a progressive enhancement after a degraded base |
+
+Implementation implications:
+
+- Use relative units, fluid grids, and container queries where useful.
+- Prefer CSS that paints crisply at the device DPR (vector icons, `rem`/`em`, SVG, or properly generated high-DPI assets).
+- Avoid fixed-pixel artboards or “design at 1440 then scale down.”
+- Test and ship the Chromebook-class viewport as the primary experience; larger displays receive the same AAA quality with more space, not a different product.
 
 ---
 
@@ -48,6 +72,7 @@
 - Mono: Geist Mono — agents, tokens, IDs
 - Hero: semibold, tight tracking, balanced line length
 - Overlines: medium, small, wide letter-spacing, amber
+- Type remains legible and crisp at Chromebook-class sizes; scale upward with viewport, never down into blur.
 
 ### Shape & depth
 
@@ -64,8 +89,9 @@
 
 ### Layout
 
-- Marketing: `max-w-6xl`
-- Command / Council surfaces: synthesis is the hero; chrome stays quiet
+- Fluid first: Chromebook viewport is the primary canvas.
+- Marketing: fluid up to `max-w-6xl` on larger screens; no fixed artboard.
+- Command / Council surfaces: synthesis is the hero; chrome stays quiet and does not waste horizontal space on small viewports.
 
 ---
 
@@ -80,6 +106,8 @@
 | Knowledge | Upload + search + cited sources |
 | Content pipeline | Status machine mirrored from TQO FINAL V5; human review required before publish |
 | Settings | Mock vs live provider; never hide simulated state |
+
+All surfaces must meet the viewport rules in §0 on Chromebook-class hardware.
 
 ---
 
@@ -97,7 +125,7 @@
 
 - Focus rings: amber
 - Contrast: navy on surface meets AA for body
-- Targets ≥ 40px height where practical
+- Targets ≥ 40px height where practical (especially on Chromebook touch/trackpad use)
 - Labels always visible on forms
 
 ---
@@ -109,6 +137,8 @@
 - [ ] Simulated badge pattern defined and used
 - [ ] `prefers-reduced-motion` respected
 - [ ] Human review gates remain visible and required where consequential
+- [ ] Primary experience verified on Chromebook-class viewport at native DPR (no blur, no fixed canvas, no wasted screen)
+- [ ] Fluid upward scale confirmed on larger / higher-DPI displays
 
 ---
 
