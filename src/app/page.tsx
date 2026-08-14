@@ -27,22 +27,59 @@ export default function Home() {
           Quiet operators make moves.
         </Heading>
         <Lede className="mt-6 text-lg">
-          The Quiet Operator is not a chatbot. Every consequential answer is deliberated by the META
-          SUPREME X Council — eight specialist councils that analyze independently, debate, and
-          surface their disagreements before a recommendation ever reaches you.
+          Not a chatbot. Every consequential answer runs the META SUPREME X Council —
+          eight seats that analyze independently, debate, and surface disagreement before
+          one recommendation reaches you. Dissent stays on the record.
         </Lede>
-        {/* One brass action. The second route is available, not advertised. */}
-        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-          <ButtonLink href="/audit">Run your Job Security Audit</ButtonLink>
-          <ButtonLink href="/council" variant="secondary">
-            See the Council
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <ButtonLink href="/council">Convene the Council</ButtonLink>
+          <ButtonLink href="/audit" variant="secondary">
+            Job Security Audit
+          </ButtonLink>
+          <ButtonLink href="/dashboard" variant="ghost">
+            Operations
           </ButtonLink>
         </div>
+        <p className="mt-6 max-w-xl text-xs leading-relaxed text-fog-dim">
+          Primary path is deliberation. Audit is deterministic and works offline. Content
+          publish still requires human review — never auto-ticked.
+        </p>
       </section>
 
       <Section
+        title="What a Council run returns"
+        lede="A decision package — not a chat bubble. Recommendation, conditions, dissent, and the evidence you need to act or refuse."
+      >
+        <Grid cols={4}>
+          {[
+            {
+              t: "Recommendation",
+              b: "One clear decision from the Supreme Orchestrator, with rationale.",
+            },
+            {
+              t: "Conditions",
+              b: "What must be true before the recommendation is safe to execute.",
+            },
+            {
+              t: "Dissent",
+              b: "Minority seats stay visible. Agreement is scored, not assumed.",
+            },
+            {
+              t: "Risks",
+              b: "Severity-tagged risks from the seats that actually own them.",
+            },
+          ].map((x) => (
+            <Card key={x.t} raised>
+              <CardTitle>{x.t}</CardTitle>
+              <CardBody>{x.b}</CardBody>
+            </Card>
+          ))}
+        </Grid>
+      </Section>
+
+      <Section
         title="The META SUPREME X Council"
-        lede="Independent analysis. Structured debate. Consensus scoring, contradiction detection, and risk evaluation — then one decisive recommendation, with dissent preserved."
+        lede="Independent analysis. Structured debate. Consensus scoring and contradiction detection — then one decisive recommendation."
       >
         <Grid cols={4}>
           {COUNCIL_IDS.map((id) => {
@@ -60,7 +97,7 @@ export default function Home() {
 
       <Section
         title="Twelve specialist agents. One operating system."
-        lede="Each agent owns a domain and answers within it. The ones that carry consequence do not answer alone — they escalate to the Council and come back with the dissent attached."
+        lede="Each agent owns a domain. High-stakes answers escalate to the Council and return with dissent attached."
       >
         <Grid cols={3}>
           {AGENT_IDS.map((id) => {
