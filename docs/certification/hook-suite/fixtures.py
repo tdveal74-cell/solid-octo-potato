@@ -2,7 +2,7 @@
 Executable fixture corpus for agent-output-gauntlet's Stop hook.
 
 Every fixture here was derived from what tests/validation-tests.md (H1-H9)
-actually enumerates, plus the defects found during the 2026-08-12 certification
+actually enumerates, plus the defects found during the 2026-08-26 certification
 audit. The point of this file is that the fixture COUNT is produced by running
 it, not asserted in prose. Whatever `run.py` reports is the real number.
 
@@ -291,7 +291,7 @@ add("h8-schema-drift", "H8",
 
 
 # =====================================================================
-# AUDIT — defects found during the 2026-08-12 certification.
+# AUDIT — defects found during the 2026-08-26 certification.
 # Each asserts the CORRECT behaviour and is marked xfail against the open
 # defect. When one starts passing, delete its xfail marker.
 # =====================================================================

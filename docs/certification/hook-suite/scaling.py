@@ -45,7 +45,7 @@ def build_cases(h):
 
     The first six are the curves tests/validation-tests.md H9 documents.
     The last two are the regexes inside strip_code that the documented curve
-    never covered - found quadratic during the 2026-08-12 certification.
+    never covered - found quadratic during the 2026-08-26 certification.
     """
     return [
         ("strip_code / unclosed ``` fences", h.strip_code,

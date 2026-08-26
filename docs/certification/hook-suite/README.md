@@ -24,7 +24,7 @@ Point them elsewhere with `--hook PATH` or `GAUNTLET_HOOK=PATH`.
 Python 3 standard library only, matching the hook. No network, no writes outside
 a temp dir, no third-party packages.
 
-## Current result (2026-08-12, against the candidate package)
+## Current result (2026-08-26, against the candidate package)
 
 ```
 TOTAL FIXTURES RUN: 205

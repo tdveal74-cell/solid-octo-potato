@@ -1,7 +1,18 @@
 # Certification audit — `agent-output-gauntlet` v1.0.0
 
-**Date:** 2026-08-12 · **Question:** promote `status` from `candidate` to `active`?
+**Audit date:** 2026-08-26 · **Question:** promote `status` from `candidate` to `active`?
 **Package audited:** `~/.claude/skills/synced/agent-output-gauntlet/` (12 files, all read; verified byte-identical at exit)
+
+> Two dates appear throughout and they are different things. **2026-08-26** is when this
+> audit ran. **2026-08-12** is the package's own authored date — the mtime on all 12 files,
+> and the date in `compilation-run-report-2026-08-12.md` and the changelog. Every
+> `2026-08-12` below refers to the package's own record, never to this audit.
+>
+> This distinction was nearly lost: the audit container's clock read 2026-08-12, which
+> happens to be the package's authored date, so the first draft of this report was stamped
+> with it and the error was invisible. Corrected against the real date. Noted here because
+> the date is how a reader tells which package state was audited, and because getting it
+> wrong silently is the defect class this audit exists to catch.
 
 ```
 VERDICT: QUARANTINE

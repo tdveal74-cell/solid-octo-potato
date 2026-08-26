@@ -22,6 +22,7 @@ import subprocess
 import sys
 import tempfile
 
+sys.dont_write_bytecode = True   # don't leave __pycache__ next to the fixtures
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fixtures import FIXTURES  # noqa: E402
 

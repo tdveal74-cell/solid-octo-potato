@@ -1,4 +1,4 @@
-# T1–T10 run record — agent-output-gauntlet certification, 2026-08-12
+# T1–T10 run record — agent-output-gauntlet certification, 2026-08-26
 critic_mode: **subagent** (real Task subagents; read-only critic + separate executing verifier)
 
 Method per test: read the pass bar → construct the fixture myself → apply the skill's own
