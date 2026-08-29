@@ -1,0 +1,16 @@
+{
+  "enabledPlugins": {
+    "agentic-guardrails@claude-community": true,
+    "backend-security-skills@claude-community": true,
+    "supabase-expert@claude-community": true,
+    "test-generator@claude-community": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-community": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-community"
+      }
+    }
+  }
+}
