@@ -2,8 +2,10 @@
 
 Date: October 21, 2026. Repository baseline: `34982f90a3e52736b9079a7af62612cbb09e1ed2`.
 
-Status: repository correction for review. No hosted database grants, policies,
-configuration, migration history, or production rows were changed by this audit.
+Status: merged and deployed on October 21, 2026 following the user's explicit
+"Merge & deploy" authorization. See [the deployment receipt](SUPABASE_PERMISSIONS_DEPLOYMENT.md)
+for live verification. The observations below describe the pre-deployment audit
+unless marked otherwise. Application data and RLS policies remain unchanged.
 
 ## Finding and evidence
 
@@ -149,9 +151,12 @@ Before any hosted application of this correction:
    preview/staging deployment with real authenticated users and Stripe test
    events before applying the new permission migration to production.
 
-No production migration or deployment is part of this review PR. No rollback
-that restores blanket anonymous grants is supplied. If an undocumented required
-caller is discovered, add only its justified operation through a reviewed change.
+The user subsequently authorized deployment, and the reviewed SQL is now applied
+as migration `20261021091846_explicit_data_api_permissions`. The repository filename
+matches that actual migration version. No rollback that restores blanket anonymous
+grants is supplied. If an undocumented required caller is discovered, add only its
+justified operation through a reviewed change. The application integration checks
+above remain distinct from the verified database deployment.
 
 ## Existing issues that remain separate
 
