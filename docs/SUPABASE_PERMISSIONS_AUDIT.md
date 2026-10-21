@@ -42,7 +42,9 @@ with CLI 2.121.0.
 
 There is no browser Supabase client in `src/`. All implemented database requests
 go through the server's PostgREST wrapper in `src/lib/db/client.ts`, using
-`SUPABASE_SERVICE_ROLE_KEY`. No key values were retrieved, published, or changed.
+`SUPABASE_SERVICE_ROLE_KEY`. No service-role key values were retrieved, published,
+or changed. Post-deployment anonymous checks used a publishable API key without
+publishing its value.
 
 | Object | Observed caller / purpose | Explicit service_role rights | anon / authenticated |
 |---|---|---|---|
