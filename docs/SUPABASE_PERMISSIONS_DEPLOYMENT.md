@@ -39,6 +39,30 @@ HTTP verification used `limit=0`; it did not retrieve private record contents.
 Privileged write paths were exercised in the disposable native test database,
 not by inserting synthetic billing or audit rows into the hosted project.
 
+## Website closeout verification
+
+On October 21, Vercel reported the production deployment
+`dpl_DjoDJYsPWCcrZVLXQkK2BHC3cJox` as READY, built from merge commit
+`625e7ad7a339b659a1ac5405c8038f844eaf46a5`, with the alias
+[quiet-operator.vercel.app](https://quiet-operator.vercel.app).
+The subsequent receipt-only merge changes no application runtime files.
+
+| Check | Result |
+|---|---|
+| Public pages | `/`, `/pricing`, `/dashboard`, `/audit`, `/council`, `/content`: HTTP 200 |
+| Public API reads | `/api/health` and `/api/agents`: HTTP 200 |
+| Invalid checkout plan | HTTP 400; no Checkout Session created |
+| Unsigned billing webhook | HTTP 400; signature verification failed |
+| Vercel project environment inventory | Only `ANTHROPIC_API_KEY`, targeting preview and production; zero hidden production variables reported |
+| Stripe live webhook inventory | No registered webhook endpoints in THE QUIET OPERATOR account |
+| Ownerless subscription reproduction | Disposable PostgreSQL rejected the insert with SQLSTATE 23514, `subscriptions_check` |
+
+These were ordinary public HTTPS requests. No deployment-authentication bypass,
+real payment, Stripe customer/subscription creation, or hosted database write was
+used. Secret values were not decrypted. The health endpoint's `aiConfigured`
+response describes AI configuration only; it does not establish billing or
+database readiness. HTTP smoke checks do not certify a browser checkout journey.
+
 ## Scope and remaining integration limits
 
 The database permission fix is deployed. This change does not require replacing
@@ -46,10 +70,16 @@ the web application bundle: no application runtime code changed.
 
 There are no deployed Edge Functions in this Supabase project. Before deployment,
 database activity counters and exact counts showed no application rows. This is
-not proof of every external consumer's configuration. The deployed website's
-Supabase URL and a full browser-session/Stripe-event journey were not independently
-verified. GraphQL is not installed and was not enabled or tested. No new paid
-preview project or branch was created.
+not proof of every external consumer's configuration. The Vercel project has no
+Supabase or Stripe environment settings, so there is no configured website
+Supabase URL to match to the inspected project. Stripe has no registered webhook
+endpoint, and the current connector exposes only the live account. A full
+browser-session/Stripe-event journey remains unverified. Adding secrets alone is
+insufficient: checkout does not establish the profile ownership required by the
+subscription schema. The concrete prerequisites and test gates are tracked in
+[the billing acceptance checklist](BILLING_INTEGRATION_ACCEPTANCE.md).
+GraphQL is not installed and was not enabled or tested. No new paid preview
+project or branch was created.
 
 The Security Advisor returned the same pre-existing findings: three intentionally
 closed tables have RLS with no policies, and the vector extension is in public.
@@ -59,4 +89,6 @@ before any separate extension relocation.
 
 The original audit records the separate getAudit ownership, organization-policy,
 and Stripe event-to-owner issues. Those application behaviors were not changed
-by this permission deployment.
+by this permission deployment. The Supabase October 30 compatibility work is
+complete; this receipt does not claim that live billing has been activated or
+certified.
