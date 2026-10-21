@@ -1,8 +1,13 @@
 -- ═══════════════════════════════════════════════════════════════════════
 -- THE QUIET OPERATOR — Postgres / Supabase schema
 -- Requires: Postgres 15+, pgvector extension
--- Apply with: psql "$DATABASE_URL" -f src/lib/db/schema.sql
+-- Requires Supabase's anon, authenticated and service_role database roles.
+-- Apply with: psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f src/lib/db/schema.sql
+-- Ordered Supabase migrations live in supabase/migrations/.
 -- ═══════════════════════════════════════════════════════════════════════
+
+begin;
+set local search_path = public, extensions;
 
 create extension if not exists vector;
 create extension if not exists pgcrypto;
@@ -136,7 +141,9 @@ returns table (
   content text,
   similarity float
 )
-language sql stable as $$
+language sql stable
+set search_path = public
+as $$
   select
     kc.id,
     kc.document_id,
@@ -178,8 +185,8 @@ create table if not exists audit_log (
 -- ── Row-level security (Supabase) ───────────────────────────────────────
 
 -- RLS is enabled on every table exposed through the Supabase Data API. Tables
--- with no policy below are deny-by-default for client roles: reachable only via
--- the service role, never the anon/auth key.
+-- with no policy below are deny-by-default for client roles. Explicit grants
+-- at the end allow only the server operations the application implements.
 --
 -- That set is: subscriptions, deliberations, audit_log.
 --
@@ -227,11 +234,12 @@ declare
     ['own runs',     'agent_runs',          'profile_id = auth.uid()'],
     ['own memory',   'user_memories',       'profile_id = auth.uid()'],
     ['own docs',     'knowledge_documents', 'owner_id = auth.uid()'],
-    -- Chunks inherit access from their parent document so match_chunks() works
-    -- under normal anon/auth roles, not just service-role RPCs.
+    -- Retain inherited document ownership for any future reviewed client access.
+    -- The current permission contract does not expose these tables or the RPC.
     ['own chunks',   'knowledge_chunks',    'exists (select 1 from knowledge_documents kd where kd.id = knowledge_chunks.document_id and kd.owner_id = auth.uid())'],
     ['own content',  'content_pieces',      'profile_id = auth.uid()'],
-    -- Members may read their own organization row (write stays service-role).
+    -- Existing FOR ALL predicate retained. Review its write scope before adding
+    -- any browser grants; it is not a read-only organization policy.
     ['member org',   'organizations',       'id in (select org_id from profiles where profiles.id = auth.uid())']
   ];
   p text[];
@@ -247,3 +255,31 @@ begin
     end loop;
   end if;
 end $$;
+
+-- Explicit Data API permissions. Keep in sync with the permission migration.
+-- Only server operations implemented in src/lib/db/client.ts are exposed.
+-- RLS policies are retained; a policy alone is not a reason to grant access.
+-- Reset legacy broad defaults for these named application objects only.
+revoke all privileges on table
+  public.organizations, public.profiles, public.subscriptions,
+  public.job_security_audits, public.career_roadmaps, public.deliberations,
+  public.agent_runs, public.user_memories, public.knowledge_documents,
+  public.knowledge_chunks, public.content_pieces, public.audit_log
+from public, anon, authenticated, service_role;
+
+grant usage on schema public to service_role;
+grant select, insert on table public.job_security_audits to service_role;
+grant select, insert, update on table public.subscriptions to service_role;
+grant insert on table public.audit_log to service_role;
+
+-- GENERATED ALWAYS AS IDENTITY does not need a sequence grant for inserts.
+-- Do not permit direct nextval/setval calls on the audit-log sequence.
+revoke all privileges on sequence public.audit_log_id_seq
+from public, anon, authenticated, service_role;
+
+-- No application RPC caller exists yet. PostgreSQL gives PUBLIC EXECUTE by
+-- default, independently of the Data API table-default change.
+revoke all privileges on function public.match_chunks(vector, integer, uuid)
+from public, anon, authenticated, service_role;
+
+commit;
