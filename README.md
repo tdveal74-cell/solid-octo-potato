@@ -76,6 +76,7 @@ and the automation stay aligned.
 
 ## Documentation
 
+- `docs/SUPABASE_PERMISSIONS_AUDIT.md` — explicit Data API grants, migration history, tests, and rollout checks
 - `docs/n8n/TQO_FINAL_V5.md` — live pipeline map (this sync)
 - `Package/docs/26_META_SUPREME_X_COUNCIL_ARCHITECTURE.md`
 - `Package/docs/27_COUNCIL_DECISION_ENGINE.md`

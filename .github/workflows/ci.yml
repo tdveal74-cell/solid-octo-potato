@@ -35,3 +35,37 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  database-permissions:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.1-pg17
+        env:
+          POSTGRES_PASSWORD: local-permissions-test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Install pinned PostgREST test server
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://github.com/PostgREST/postgrest/releases/download/v16.5/postgrest-v16.5-linux-static-x86-64.tar.xz -o "$RUNNER_TEMP/postgrest.tar.xz"
+          echo "5099e7ada38f9f6846cd87c14c5f158b7c165f1e9959665ad412e61f4dceba95  $RUNNER_TEMP/postgrest.tar.xz" | sha256sum --check
+          tar --no-same-owner -xJf "$RUNNER_TEMP/postgrest.tar.xz" -C "$RUNNER_TEMP"
+          echo "POSTGREST_BIN=$RUNNER_TEMP/postgrest" >> "$GITHUB_ENV"
+      - name: Fresh schema, upgrades, RLS and real API requests
+        env:
+          TQO_TEST_POSTGRES_URL: postgresql://postgres:local-permissions-test@127.0.0.1:5432/postgres
+        run: npm run test:db
