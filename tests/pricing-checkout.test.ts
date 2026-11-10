@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it } from "vitest";
-import PricingPage from "@/app/pricing/page";
+import PricingPage, { dynamic as pricingDynamic } from "@/app/pricing/page";
 import {
   DEFAULT_OPERATOR_PAYMENT_LINK,
   operatorCheckout,
@@ -55,6 +55,10 @@ describe("Operator payment link", () => {
   it("uses the Checkout Session route only when STRIPE_SECRET_KEY is set", () => {
     expect(operatorCheckout({ STRIPE_SECRET_KEY: "sk_test_present" })).toEqual({ mode: "api" });
     expect(operatorCheckout({ STRIPE_SECRET_KEY: "   " }).mode).toBe("payment-link");
+  });
+
+  it("chooses the checkout mode on each request", () => {
+    expect(pricingDynamic).toBe("force-dynamic");
   });
 
   it("renders the Operator button as that exact payment link", () => {
