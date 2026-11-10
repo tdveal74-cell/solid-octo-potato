@@ -3,6 +3,8 @@ import { PLANS } from "@/lib/billing/plans";
 
 /**
  * Creates a Stripe Checkout Session when STRIPE_SECRET_KEY is configured.
+ * /pricing calls this only in that case. With no secret, the Operator button
+ * is a Payment Link and does not post here.
  * Without keys, returns a clear setup payload (no silent failure).
  */
 export async function POST(req: NextRequest) {
